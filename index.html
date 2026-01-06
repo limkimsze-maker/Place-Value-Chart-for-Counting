@@ -14,7 +14,7 @@
     --S: 13px;
 
     /* place colors (header + panel tint) */
-    --c-tm-h:#111827; --c-tm-t:#f3f4f6; /* ten millions */
+    --c-tm-h:#0b2a6a; --c-tm-t:#e6efff; /* ten millions (very dark blue) */
     --c-m-h:#7c3aed;  --c-m-t:#f3e8ff; /* millions */
     --c-ht-h:#2563eb; --c-ht-t:#e0f2fe; /* hundred thousands */
     --c-tt-h:#ef4444; --c-tt-t:#ffe4e6; /* ten thousands */
@@ -172,21 +172,25 @@
     align-items:end;
   }
 
+  /* blocks */
   .blk{ display:block; }
   .blk svg{ width: 100%; height: 100%; display:block; }
 
+  /* sized off your uploaded SVG viewBoxes */
   .blk.one      { width: calc(var(--S) * 3.2);  height: calc(var(--S) * 3.6); }
   .blk.ten      { width: calc(var(--S) * 2.4);  height: calc(var(--S) * 12.0);}
   .blk.hundred  { width: calc(var(--S) * 10.0); height: calc(var(--S) * 6.5); }
   .blk.thousand { width: calc(var(--S) * 7.8);  height: calc(var(--S) * 9.0); }
-  .blk.tenk     { width: calc(var(--S) * 9.4);  height: calc(var(--S) * 10.8); }
 
   /* discs */
   .discStack{
     display:flex;
-    flex-direction: column-reverse;
-    gap: calc(var(--S) * 0.40);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content:center;
     align-items:center;
+    gap: calc(var(--S) * 0.55);
+    padding: 4px 0;
   }
   .disc{
     width:  calc(var(--S) * 3.6);
@@ -323,15 +327,33 @@
     border: 2px solid rgba(0,0,0,.10);
     box-shadow: 0 10px 18px rgba(0,0,0,.14);
     clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+
+    --pv-fs: 26px;
+    --pv-gap: 14px;
   }
   .pvCard .digits{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-wrap: nowrap;
+    gap: var(--pv-gap);
     font-weight: 1000;
-    font-size: 26px;
+    font-size: var(--pv-fs);
     color:#000;
-    letter-spacing: .35em;
-    transform: translateX(.15em);
     user-select:none;
+    letter-spacing: 0;
+    transform: none;
+    white-space: nowrap;
   }
+  .pvCard{ --pv-minw: 0.9em; } /* ✅ default */
+
+.pvCard .digits span{
+  display:inline-block;
+  min-width: var(--pv-minw); /* ✅ adjustable per card */
+  text-align:center;
+}
+
+
   .togetherRow{
     display:flex;
     justify-content:center;
@@ -570,9 +592,11 @@
     </div>
 
     <div class="actions">
-      <div class="pill"><span>Number:</span><strong id="numRead">0</strong></div>
+      <div class="pill" style="display:none;"><span>Number:</span><strong id="numRead">0</strong></div>
       <div class="pill"><span>Mode:</span><strong id="modeRead">Blocks</strong></div>
+      <button class="iconBtn" id="toggleChart" title="Hide/Show Chart">📊</button>
       <button class="iconBtn" id="openSettings" title="Settings">⚙️</button>
+
     </div>
   </div>
 
@@ -607,7 +631,7 @@
       <div class="expLine" id="expLine"><small></small></div>
     </div>
 
-    <div class="chartWrap">
+    <div class="chartWrap" id="chartWrap">
       <div class="chartHead" id="chartHead"></div>
       <div class="chartDigits" id="chartDigits"></div>
     </div>
@@ -625,7 +649,7 @@
     <div class="drawerBody">
       <div class="field">
         <label>Number (0 to 10,000,000)</label>
-        <input id="numInput" type="number" min="0" max="10000000" step="1" value="2634" />
+        <input id="numInput" type="number" min="0" max="10000000" step="1" value="3241" />
       </div>
 
       <div class="field">
@@ -669,7 +693,6 @@
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  // ✅ Added Ten Millions (max 10,000,000)
   const PLACES = [
     { key:"tm", name:"Ten Millions",      value:10000000, label:"10,000,000", head:"--c-tm-h", tint:"--c-tm-t" },
     { key:"m",  name:"Millions",          value:1000000,  label:"1,000,000",  head:"--c-m-h",  tint:"--c-m-t"  },
@@ -681,36 +704,71 @@
     { key:"o",  name:"Ones",              value:1,        label:"1",          head:"--c-o-h",  tint:"--c-o-t"  },
   ];
 
-  // Ones & Tens (exact)
-  const SVG_ONE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56.50 64.00">
-<defs><style>.cls-1{fill:#f7b12b;}.cls-2{fill:#c97e00;}.cls-3{fill:#e48f00;}.cls-4{fill:#fff;}</style></defs>
-<polygon class="cls-2" points="0 16 0 48 28.25 64 28.25 32 0 16"/>
-<polygon class="cls-3" points="28.25 0 0 16 28.25 32 56.5 16 28.25 0"/>
-<polygon class="cls-1" points="56.5 16 28.25 32 28.25 64 56.5 48 56.5 16"/>
-<polygon class="cls-4" points="28.25 33.15 1 17.73 1.5 16.86 28.25 32 55 16.86 55.5 17.73 28.25 33.15"/>
+  // ✅ Embedded SVG raw (from your uploaded files)
+  const SVG_ONE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56.5 64">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #f7b12b;
+      }
+
+      .cls-2 {
+        fill: #c97e00;
+      }
+
+      .cls-3 {
+        fill: #e48f00;
+      }
+
+      .cls-4 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <polygon class="cls-2" points="0 16 0 48 28.25 64 28.25 32 0 16"/>
+  <polygon class="cls-3" points="28.25 0 0 16 28.25 32 56.5 16 28.25 0"/>
+  <polygon class="cls-1" points="56.5 16 28.25 32 28.25 64 56.5 48 56.5 16"/>
+  <polygon class="cls-4" points="28.25 33.15 1 17.73 1.5 16.86 28.25 32 55 16.86 55.5 17.73 28.25 33.15"/>
+</svg>`;
+  const SVG_TEN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 39.18 206">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #30a5ff;
+      }
+
+      .cls-2 {
+        fill: #1f66cc;
+      }
+
+      .cls-3 {
+        fill: #1b8eea;
+      }
+
+      .cls-4 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <polygon class="cls-2" points="0 10.3 0 195.7 19.59 206 19.59 20.6 0 10.3"/>
+  <polygon class="cls-3" points="19.59 0 0 10.3 19.59 20.6 39.18 10.3 19.59 0"/>
+  <polygon class="cls-1" points="39.18 10.3 19.59 20.6 19.59 206 39.18 195.7 39.18 10.3"/>
+  <g>
+    <polygon class="cls-4" points="19.59 21.74 1 11.95 1.46 11.06 19.59 20.6 37.72 11.06 38.18 11.95 19.59 21.74"/>
+    <polygon class="cls-4" points="19.59 40.24 1 30.45 1.46 29.56 19.59 39.1 37.72 29.56 38.18 30.45 19.59 40.24"/>
+    <polygon class="cls-4" points="19.59 58.74 1 48.95 1.46 48.06 19.59 57.6 37.72 48.06 38.18 48.95 19.59 58.74"/>
+    <polygon class="cls-4" points="19.59 77.24 1 67.45 1.46 66.56 19.59 76.1 37.72 66.56 38.18 67.45 19.59 77.24"/>
+    <polygon class="cls-4" points="19.59 95.74 1 85.95 1.46 85.06 19.59 94.6 37.72 85.06 38.18 85.95 19.59 95.74"/>
+    <polygon class="cls-4" points="19.59 114.24 1 104.45 1.46 103.56 19.59 113.1 37.72 103.56 38.18 104.45 19.59 114.24"/>
+    <polygon class="cls-4" points="19.59 132.74 1 122.95 1.46 122.06 19.59 131.6 37.72 122.06 38.18 122.95 19.59 132.74"/>
+    <polygon class="cls-4" points="19.59 151.24 1 141.45 1.46 140.56 19.59 150.1 37.72 140.56 38.18 141.45 19.59 151.24"/>
+    <polygon class="cls-4" points="19.59 169.74 1 159.95 1.46 159.06 19.59 168.6 37.72 159.06 38.18 159.95 19.59 169.74"/>
+    <polygon class="cls-4" points="19.59 188.24 1 178.45 1.46 177.56 19.59 187.1 37.72 177.56 38.18 178.45 19.59 188.24"/>
+  </g>
 </svg>`;
 
-  const SVG_TEN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 39.18 206.00">
-<defs><style>.cls-1{fill:#30a5ff;}.cls-2{fill:#1f66cc;}.cls-3{fill:#1b8eea;}.cls-4{fill:#fff;}</style></defs>
-<polygon class="cls-2" points="0 10.3 0 195.7 19.59 206 19.59 20.6 0 10.3"/>
-<polygon class="cls-3" points="19.59 0 0 10.3 19.59 20.6 39.18 10.3 19.59 0"/>
-<polygon class="cls-1" points="39.18 10.3 19.59 20.6 19.59 206 39.18 195.7 39.18 10.3"/>
-<g>
-<polygon class="cls-4" points="19.59 21.74 1 11.95 1.46 11.06 19.59 20.6 37.72 11.06 38.18 11.95 19.59 21.74"/>
-<polygon class="cls-4" points="19.59 40.24 1 30.45 1.46 29.56 19.59 39.1 37.72 29.56 38.18 30.45 19.59 40.24"/>
-<polygon class="cls-4" points="19.59 58.74 1 48.95 1.46 48.06 19.59 57.6 37.72 48.06 38.18 48.95 19.59 58.74"/>
-<polygon class="cls-4" points="19.59 77.24 1 67.45 1.46 66.56 19.59 76.1 37.72 66.56 38.18 67.45 19.59 77.24"/>
-<polygon class="cls-4" points="19.59 95.74 1 85.95 1.46 85.06 19.59 94.6 37.72 85.06 38.18 85.95 19.59 95.74"/>
-<polygon class="cls-4" points="19.59 114.24 1 104.45 1.46 103.56 19.59 113.1 37.72 103.56 38.18 104.45 19.59 114.24"/>
-<polygon class="cls-4" points="19.59 132.74 1 122.95 1.46 122.06 19.59 131.6 37.72 122.06 38.18 122.95 19.59 132.74"/>
-<polygon class="cls-4" points="19.59 151.24 1 141.45 1.46 140.56 19.59 150.1 37.72 140.56 38.18 141.45 19.59 151.24"/>
-<polygon class="cls-4" points="19.59 169.74 1 159.95 1.46 159.06 19.59 168.6 37.72 159.06 38.18 159.95 19.59 169.74"/>
-<polygon class="cls-4" points="19.59 188.24 1 178.45 1.46 177.56 19.59 187.1 37.72 177.56 38.18 178.45 19.59 188.24"/>
-</g></svg>`;
-
-  // ✅ Your uploaded HUNDRED svg (embedded exact raw text)
-  const SVG_HUNDRED_RAW = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 181.21 118.00">
+  // ✅ REPLACED with your uploaded hundred_base_ten_block.svg
+  const SVG_HUNDRED = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 181.21 118.00">
 <defs>
       <clipPath id="hundred-clip-top"><polygon points="90.60,4.00 177.21,54.00 90.60,104.00 4.00,54.00"/></clipPath>
       <clipPath id="hundred-clip-right"><polygon points="177.21,64.00 90.60,114.00 90.60,104.00 177.21,54.00"/></clipPath>
@@ -734,9 +792,8 @@
   
 </svg>`;
 
-  // ✅ Your uploaded THOUSAND svg (embedded exact raw text)
-  const SVG_THOUSAND_RAW = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 146.56 168.00">
+  // ✅ REPLACED with your uploaded thousand_base_ten_block.svg
+  const SVG_THOUSAND = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 146.56 168.00">
 <defs>
       <clipPath id="thousand-clip-top"><polygon points="73.28,4.00 142.56,44.00 73.28,84.00 4.00,44.00"/></clipPath>
       <clipPath id="thousand-clip-right"><polygon points="142.56,124.00 73.28,164.00 73.28,84.00 142.56,44.00"/></clipPath>
@@ -760,26 +817,20 @@
   
 </svg>`;
 
-  // --- Make repeated SVG defs safe (unique IDs) ---
   let __svgSeq = 0;
-  const stripXmlHeader = (s) => s
-    .replace(/^\s*<\?xml[^>]*\?>\s*/i, "")
-    .replace(/^\s*<!doctype[^>]*>\s*/i, "");
   function uniquifySvgIds(svgText, prefix){
     __svgSeq += 1;
     const suf = `${prefix}__${__svgSeq}`;
     return svgText
       .replace(/\bid="([^"]+)"/g, (m, id) => `id="${id}__${suf}"`)
-      .replace(/url\(#([^)]+)\)/g, (m, id) => `url(#${id}__${suf})`)
-      .replace(/\bclip-path="url\(#([^)]+)\)"/g, (m, id) => `clip-path="url(#${id}__${suf})"`)
-      .replace(/\b(xlink:href|href)="#([^"]+)"/g, (m, attr, id) => `${attr}="#${id}__${suf}"`);
+      .replace(/url\(#([^)]+)\)/g, (m, id) => `url(#${id}__${suf})`);
   }
 
   function blockSVG(placeKey){
-    if (placeKey === "o") return SVG_ONE;
-    if (placeKey === "t") return SVG_TEN;
-    if (placeKey === "h") return uniquifySvgIds(stripXmlHeader(SVG_HUNDRED_RAW), "hundred");
-    if (placeKey === "th") return uniquifySvgIds(stripXmlHeader(SVG_THOUSAND_RAW), "thousand");
+    if (placeKey === "o")  return uniquifySvgIds(SVG_ONE, "one");
+    if (placeKey === "t")  return uniquifySvgIds(SVG_TEN, "ten");
+    if (placeKey === "h")  return uniquifySvgIds(SVG_HUNDRED, "hundred");
+    if (placeKey === "th") return uniquifySvgIds(SVG_THOUSAND, "thousand");
     return "";
   }
   function blockClass(placeKey){
@@ -797,6 +848,7 @@
     return "";
   }
 
+  // discs color helpers
   function hexToRgb(hex){
     const m = hex.trim().match(/^#?([0-9a-f]{6})$/i);
     if (!m) return {r:0,g:0,b:0};
@@ -822,7 +874,7 @@
     if (placeKey === "tt") return "#ef4444";
     if (placeKey === "ht") return "#2563eb";
     if (placeKey === "m")  return "#7c3aed";
-    if (placeKey === "tm") return "#111827";
+    if (placeKey === "tm") return "#0b2a6a"; // ✅ very dark blue
     return "#64748b";
   }
   function discHTML(place){
@@ -834,6 +886,17 @@
     return `<div class="disc" style="--disc-fill:${fill}; --disc-rim:${rim};">${place.value}</div>`;
   }
 
+  // card digit fit helper
+  function cardSizing(len){
+  if (len <= 4) return { fs: 26, gap: 14, minw: 0.90 };
+  if (len === 5) return { fs: 24, gap: 12, minw: 0.88 };
+  if (len === 6) return { fs: 22, gap: 10, minw: 0.84 };
+  if (len === 7) return { fs: 18, gap: 6,  minw: 0.78 }; // ✅ 9,000,000 fits
+  return            { fs: 16, gap: 5,  minw: 0.74 };     // ✅ 10,000,000 fits
+}
+
+
+  // UI
   const panelGrid = $("panelGrid");
   const chartHead = $("chartHead");
   const chartDigits = $("chartDigits");
@@ -869,6 +932,21 @@
   const btnTogether = $("btnTogether");
   const btnToggleCards = $("btnToggleCards");
   const btnToggleExpanded = $("btnToggleExpanded");
+const chartWrap = $("chartWrap");
+const toggleChart = $("toggleChart");
+
+let chartVisible = true;
+function applyChartVisibility(){
+  chartWrap.style.display = chartVisible ? "block" : "none";
+  toggleChart.textContent = chartVisible ? "📊" : "📈";
+  toggleChart.title = chartVisible ? "Hide Chart" : "Show Chart";
+}
+toggleChart.addEventListener("click", () => {
+  chartVisible = !chartVisible;
+  applyChartVisibility();
+  requestAnimationFrame(() => fitAllPanels());
+});
+
 
   let cardsVisible = true;
   let expandedVisible = true;
@@ -881,9 +959,7 @@
     if (!Number.isFinite(n)) n = 0;
     return Math.max(min, Math.min(max, Math.floor(n)));
   }
-  function comma(n){
-    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  }
+  function comma(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
   function digitsFor(n){
     const out = {};
     for (const p of PLACES) out[p.key] = Math.floor(n / p.value) % 10;
@@ -895,7 +971,7 @@
     return PLACES.slice(first);
   }
   function effectiveMode(n){
-    if (n >= 10000) return "discs";
+    if (n >= 10000) return "discs"; // ✅ 10,000 uses discs
     if (preferredMode === "discs") return "discs";
     if (preferredMode === "blocks") return "blocks";
     return "blocks";
@@ -927,7 +1003,7 @@
     });
   }
 
-  // words + expanded
+  // number words (Singapore textbook feel)
   const ONES = ["zero","one","two","three","four","five","six","seven","eight","nine"];
   const TEENS = ["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
   const TENSW = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
@@ -944,35 +1020,36 @@
     if (!r) return `${ONES[h]} hundred`;
     return `${ONES[h]} hundred and ${wordsUnder100(r)}`;
   }
+
+  // ✅ up to 10,000,000 only
+  // ✅ commas between groups, but NO comma before "and" (when final remainder < 100)
   function numberToWords(n){
-  if (n === 0) return "zero";
-  if (n < 1000) return wordsUnder1000(n);
-  if (n === 10000000) return "ten million";
+    if (n === 0) return "zero";
+    if (n < 1000) return wordsUnder1000(n);
+    if (n === 10000000) return "ten million";
 
-  const millions  = Math.floor(n / 1000000);   // 0..9  (10 handled above)
-  const remM      = n % 1000000;
+    const tm = Math.floor(n / 10000000); // 0..1
+    const remTM = n % 10000000;
 
-  const thousands = Math.floor(remM / 1000);   // 0..999
-  const last      = remM % 1000;               // 0..999
+    const m = Math.floor(remTM / 1000000); // 0..9
+    const remM = remTM % 1000000;
 
-  const major = [];
-  if (millions)  major.push(`${wordsUnder1000(millions)} million`);
-  if (thousands) major.push(`${wordsUnder1000(thousands)} thousand`);
+    const th = Math.floor(remM / 1000); // 0..999
+    const last = remM % 1000;           // 0..999
 
-  // nothing after thousand/million
-  if (last === 0) return major.join(", ");
+    const major = [];
+    if (tm) major.push("ten million");
+    if (m)  major.push(`${wordsUnder1000(m)} million`);
+    if (th) major.push(`${wordsUnder1000(th)} thousand`);
 
-  const majorText = major.join(", ");
+    if (last === 0) return major.join(", ");
+    const majorText = major.join(", ");
 
-  // ✅ Exception: no comma before "and"
-  // Use "and" ONLY when the final remainder is < 100 (e.g., 3,041)
-  if (last < 100) {
-    return `${majorText} and ${wordsUnder100(last)}`;
+    if (!majorText) return wordsUnder1000(last);
+
+    if (last < 100) return `${majorText} and ${wordsUnder100(last)}`;
+    return `${majorText}, ${wordsUnder1000(last)}`;
   }
-
-  // Otherwise, use comma before the 100–999 remainder (e.g., 3,241)
-  return `${majorText}, ${wordsUnder1000(last)}`;
-}
 
   function placeLabel(placeKey, digit){
     const base = { tm:"ten million", m:"million", ht:"hundred thousand", tt:"ten thousand", th:"thousand", h:"hundred", t:"ten", o:"one" }[placeKey] || placeKey;
@@ -1000,14 +1077,17 @@
       const digit = digs[place.key];
       const z = zerosCount(place.key);
       const txt = String(digit) + ("0".repeat(z));
+      const len = txt.length;
       const {bg,border} = placeFill(place.key);
+      const {fs, gap, minw} = cardSizing(len);
+      const spans = txt.split("").map(ch => `<span>${ch}</span>`).join("");
 
       const item = document.createElement("div");
       item.className = "apartItem";
       item.innerHTML = `
         <div class="cap">${placeLabel(place.key, digit)}</div>
-        <div class="pvCard" style="background:${bg}; border-color:${border};">
-          <div class="digits">${txt.split("").join(" ")}</div>
+        <div class="pvCard" style="background:${bg}; border-color:${border}; --pv-fs:${fs}px; --pv-gap:${gap}px; --pv-minw:${minw}em;">
+          <div class="digits">${spans}</div>
         </div>
       `;
       cardsApart.appendChild(item);
@@ -1056,7 +1136,16 @@
   }
 
   function render(){
-    const n = clampInt(numInput.value, 0, 10000000);
+    let raw = parseInt(numInput.value, 10);
+    if (!Number.isFinite(raw)) raw = 0;
+
+    if (raw > 10000000) {
+      raw = 10000000;
+      showToast("Max is 10,000,000.");
+    }
+    if (raw < 0) raw = 0;
+
+    const n = raw;
     numInput.value = n;
 
     const digs = digitsFor(n);
@@ -1080,6 +1169,7 @@
       showToast("Number ≥ 10,000 → switching to Discs automatically.");
     }
 
+    // panels
     panelGrid.innerHTML = "";
     act.forEach(place => {
       const digit = digs[place.key];
@@ -1125,6 +1215,7 @@
       panelGrid.appendChild(panel);
     });
 
+    // chart
     chartHead.innerHTML = "";
     chartDigits.innerHTML = "";
     act.forEach(place => {
@@ -1204,9 +1295,11 @@
   document.documentElement.style.setProperty("--S", clampInt(size.value,9,16) + "px");
   preferredMode = "auto";
   render();
-  window.addEventListener("resize", () => requestAnimationFrame(() => fitAllPanels()));
+  applyChartVisibility();
 
+  window.addEventListener("resize", () => requestAnimationFrame(() => fitAllPanels()));
 })();
 </script>
 </body>
 </html>
+```
