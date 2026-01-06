@@ -945,28 +945,34 @@
     return `${ONES[h]} hundred and ${wordsUnder100(r)}`;
   }
   function numberToWords(n){
-    if (n === 0) return "zero";
-    if (n === 10000000) return "ten million";
+  if (n === 0) return "zero";
+  if (n < 1000) return wordsUnder1000(n);
+  if (n === 10000000) return "ten million";
 
-    const tm = Math.floor(n/10000000);
-    const remTM = n % 10000000;
+  const millions  = Math.floor(n / 1000000);   // 0..9  (10 handled above)
+  const remM      = n % 1000000;
 
-    const m = Math.floor(remTM/1000000);
-    const remM = remTM % 1000000;
+  const thousands = Math.floor(remM / 1000);   // 0..999
+  const last      = remM % 1000;               // 0..999
 
-    const th = Math.floor(remM/1000);
-    const remT = remM % 1000;
+  const major = [];
+  if (millions)  major.push(`${wordsUnder1000(millions)} million`);
+  if (thousands) major.push(`${wordsUnder1000(thousands)} thousand`);
 
-    const parts = [];
-    if (tm) parts.push("ten million");
-    if (m) parts.push(`${wordsUnder1000(m)} million`);
-    if (th) parts.push(`${wordsUnder1000(th)} thousand`);
-    if (remT){
-      if (parts.length && remT < 100) parts.push(`and ${wordsUnder100(remT)}`);
-      else parts.push(wordsUnder1000(remT));
-    }
-    return parts.join(", ");
+  // nothing after thousand/million
+  if (last === 0) return major.join(", ");
+
+  const majorText = major.join(", ");
+
+  // ✅ Exception: no comma before "and"
+  // Use "and" ONLY when the final remainder is < 100 (e.g., 3,041)
+  if (last < 100) {
+    return `${majorText} and ${wordsUnder100(last)}`;
   }
+
+  // Otherwise, use comma before the 100–999 remainder (e.g., 3,241)
+  return `${majorText}, ${wordsUnder1000(last)}`;
+}
 
   function placeLabel(placeKey, digit){
     const base = { tm:"ten million", m:"million", ht:"hundred thousand", tt:"ten thousand", th:"thousand", h:"hundred", t:"ten", o:"one" }[placeKey] || placeKey;
