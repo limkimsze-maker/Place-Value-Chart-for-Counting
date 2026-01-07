@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -13,6 +14,10 @@
 
     --S: 13px;
 
+    /* ✅ settings side-space (so it won’t block chart) */
+    --drawerW: min(420px, 92vw);
+    --sidePad: 0px;
+
     /* place colors (header + panel tint) */
     --c-tm-h:#0b2a6a; --c-tm-t:#e6efff; /* ten millions (very dark blue) */
     --c-m-h:#7c3aed;  --c-m-t:#f3e8ff; /* millions */
@@ -22,6 +27,11 @@
     --c-h-h:#ec4899;  --c-h-t:#ffe4f1; /* hundreds */
     --c-t-h:#f59e0b;  --c-t-t:#fff1db; /* tens */
     --c-o-h:#06b6d4;  --c-o-t:#dff7ff; /* ones */
+  }
+
+  /* ✅ when settings are open, reserve space on the right (desktop) */
+  @media (min-width: 980px){
+    body.settings-open{ --sidePad: var(--drawerW); }
   }
 
   *{ box-sizing:border-box; }
@@ -42,7 +52,7 @@
     background: rgba(255,255,255,.92);
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--line);
-    padding: 10px 14px;
+    padding: 10px calc(14px + var(--sidePad)) 10px 14px; /* ✅ */
     display:flex;
     align-items:center;
     justify-content: space-between;
@@ -89,7 +99,7 @@
     height: calc(100vh - 62px);
     max-width: 1300px;
     margin: 0 auto;
-    padding: 12px 14px 10px;
+    padding: 12px calc(14px + var(--sidePad)) 10px 14px; /* ✅ */
     display:flex;
     flex-direction: column;
     gap: 12px;
@@ -449,29 +459,32 @@
   .chartDigits .cell:last-child{ border-right:0; }
 
   /* drawer */
-  .drawerBackdrop{
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,.35);
-    display:none;
-    z-index: 20;
-  }
-  .drawer{
-    position: fixed;
-    right: 0;
-    top: 0;
-    height: 100%;
-    width: min(420px, 92vw);
-    background: #fff;
-    border-left: 1px solid var(--line);
-    box-shadow: -18px 0 40px rgba(0,0,0,.20);
-    transform: translateX(100%);
-    transition: transform .22s ease;
-    z-index: 21;
-    display:flex;
-    flex-direction: column;
-  }
-  .drawer.open{ transform: translateX(0); }
+.drawerBackdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0);   /* ✅ no dimming */
+  display: none;
+  z-index: 20;
+}
+.drawerBackdrop.open{ display:block; } /* ✅ MUST keep this */
+
+.drawer{
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: var(--drawerW);
+  background: #fff;
+  border-left: 1px solid var(--line);
+  box-shadow: -22px 0 55px rgba(0,0,0,.28); /* ✅ more visible */
+  transform: translateX(100%);
+  transition: transform .22s ease;
+  z-index: 21; /* ✅ above backdrop */
+  display:flex;
+  flex-direction: column;
+}
+.drawer.open{ transform: translateX(0); }
+
   .drawerBackdrop.open{ display:block; }
   .drawerTop{
     padding: 12px 14px;
@@ -583,7 +596,6 @@
   }
 </style>
 </head>
-<script src="https://cdn.counter.dev/script.js" data-id="825e93b6-ce99-40ef-8bcc-125f13297433" data-utcoffset="8"></script>
 <body>
 
   <div class="topbar">
@@ -596,7 +608,7 @@
       <div class="pill" style="display:none;"><span>Number:</span><strong id="numRead">0</strong></div>
       <div class="pill"><span>Mode:</span><strong id="modeRead">Blocks</strong></div>
       <button class="iconBtn" id="toggleChart" title="Hide/Show Chart">📊</button>
-      <button class="iconBtn" id="openSettings" title="Settings">⚙️</button>
+      <button class="iconBtn" id="openSettings" title="Show/Hide Settings">⚙️</button>
 
     </div>
   </div>
@@ -645,12 +657,22 @@
   <aside class="drawer" id="drawer" aria-hidden="true">
     <div class="drawerTop">
       <div class="h">Settings</div>
-      <button class="iconBtn" id="closeSettings" title="Close">✕</button>
+      <button class="iconBtn" id="closeSettings" title="Hide Settings">✕</button>
     </div>
     <div class="drawerBody">
       <div class="field">
         <label>Number (0 to 10,000,000)</label>
         <input id="numInput" type="number" min="0" max="10000000" step="1" value="3241" />
+      </div>
+
+      <!-- ✅ Increment/Decrement controls -->
+      <div class="field">
+        <label>Step (increment/decrement)</label>
+        <input id="stepInput" type="number" min="1" max="10000000" step="1" value="1" />
+        <div class="btnRow" style="margin-top:10px;">
+          <button class="btn" id="decStep" type="button">− Step</button>
+          <button class="btn" id="incStep" type="button">+ Step</button>
+        </div>
       </div>
 
       <div class="field">
@@ -936,6 +958,11 @@
 const chartWrap = $("chartWrap");
 const toggleChart = $("toggleChart");
 
+/* ✅ step controls */
+const stepInput = $("stepInput");
+const incStepBtn = $("incStep");
+const decStepBtn = $("decStep");
+
 let chartVisible = true;
 function applyChartVisibility(){
   chartWrap.style.display = chartVisible ? "block" : "none";
@@ -1149,6 +1176,11 @@ toggleChart.addEventListener("click", () => {
     const n = raw;
     numInput.value = n;
 
+    /* ✅ keep numInput arrows aligned to chosen step */
+    const step = clampInt(stepInput.value, 1, 10000000);
+    stepInput.value = step;
+    numInput.step = String(step);
+
     const digs = digitsFor(n);
     const act = activePlaces(digs);
     const mode = effectiveMode(n);
@@ -1244,13 +1276,22 @@ toggleChart.addEventListener("click", () => {
     drawer.classList.add("open");
     backdrop.classList.add("open");
     drawer.setAttribute("aria-hidden","false");
+    document.body.classList.add("settings-open"); /* ✅ reserve space */
+    requestAnimationFrame(() => fitAllPanels());
   }
   function closeDrawer(){
     drawer.classList.remove("open");
     backdrop.classList.remove("open");
     drawer.setAttribute("aria-hidden","true");
+    document.body.classList.remove("settings-open"); /* ✅ */
+    requestAnimationFrame(() => fitAllPanels());
   }
-  openSettings.addEventListener("click", openDrawer);
+  function toggleDrawer(){
+    if (drawer.classList.contains("open")) closeDrawer();
+    else openDrawer();
+  }
+
+  openSettings.addEventListener("click", toggleDrawer); /* ✅ hide/show */
   closeSettings.addEventListener("click", closeDrawer);
   backdrop.addEventListener("click", closeDrawer);
 
@@ -1278,6 +1319,18 @@ toggleChart.addEventListener("click", () => {
     requestAnimationFrame(() => fitAllPanels());
   });
 
+  /* ✅ increment / decrement by chosen step */
+  function adjustByStep(dir){
+    const step = clampInt(stepInput.value, 1, 10000000);
+    stepInput.value = step;
+    const n = clampInt(numInput.value, 0, 10000000);
+    numInput.value = clampInt(n + (dir * step), 0, 10000000);
+    render();
+  }
+  incStepBtn.addEventListener("click", () => adjustByStep(+1));
+  decStepBtn.addEventListener("click", () => adjustByStep(-1));
+  stepInput.addEventListener("input", render);
+
   // settings actions
   apply.addEventListener("click", () => { render(); closeDrawer(); });
   clearBtn.addEventListener("click", () => { numInput.value = 0; preferredMode = "auto"; render(); });
@@ -1304,7 +1357,3 @@ toggleChart.addEventListener("click", () => {
 </body>
 </html>
 ```
-
-
-
-
