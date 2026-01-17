@@ -184,7 +184,7 @@
   }
 
   /* blocks */
-  .blk{ display:block; }
+  .blk{ display:block; transition: opacity .22s ease, transform .22s ease, filter .22s ease; }
   .blk svg{ width: 100%; height: 100%; display:block; }
 
   /* sized off your uploaded SVG viewBoxes */
@@ -224,6 +224,7 @@
       inset 0 -6px 10px rgba(0,0,0,.10);
     position: relative;
     user-select:none;
+    transition: opacity .22s ease, transform .22s ease, filter .22s ease; /* ✅ */
   }
   .disc::before{
     content:"";
@@ -243,6 +244,35 @@
     border-radius: 999px;
     box-shadow: inset 0 2px 0 rgba(255,255,255,.25);
     pointer-events:none;
+  }
+
+  /* ✅ regrouping clarity: vanishing background items */
+  .vanish{
+    opacity: 0 !important;
+    transform: scale(.92) !important;
+    filter: blur(.25px) !important;
+  }
+
+  /* ✅ animation overlay */
+  .animLayer{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+  }
+  .ghost{
+    position: fixed;
+    left: 0; top: 0;
+    will-change: transform, opacity, filter;
+    pointer-events: none;
+  }
+  body.animating .iconBtn,
+  body.animating .btn,
+  body.animating input{
+    pointer-events: none;
+  }
+  body.animating .drawer{
+    pointer-events: none;
   }
 
   /* cards + words + expanded */
@@ -358,12 +388,11 @@
   }
   .pvCard{ --pv-minw: 0.9em; } /* ✅ default */
 
-.pvCard .digits span{
-  display:inline-block;
-  min-width: var(--pv-minw); /* ✅ adjustable per card */
-  text-align:center;
-}
-
+  .pvCard .digits span{
+    display:inline-block;
+    min-width: var(--pv-minw); /* ✅ adjustable per card */
+    text-align:center;
+  }
 
   .togetherRow{
     display:flex;
@@ -714,6 +743,9 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- ✅ animation layer for regrouping / ungrouping clarity -->
+  <div class="animLayer" id="animLayer"></div>
+
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -733,21 +765,10 @@
   const SVG_ONE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56.5 64">
   <defs>
     <style>
-      .cls-1 {
-        fill: #f7b12b;
-      }
-
-      .cls-2 {
-        fill: #c97e00;
-      }
-
-      .cls-3 {
-        fill: #e48f00;
-      }
-
-      .cls-4 {
-        fill: #fff;
-      }
+      .cls-1 { fill: #f7b12b; }
+      .cls-2 { fill: #c97e00; }
+      .cls-3 { fill: #e48f00; }
+      .cls-4 { fill: #fff; }
     </style>
   </defs>
   <polygon class="cls-2" points="0 16 0 48 28.25 64 28.25 32 0 16"/>
@@ -758,21 +779,10 @@
   const SVG_TEN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 39.18 206">
   <defs>
     <style>
-      .cls-1 {
-        fill: #30a5ff;
-      }
-
-      .cls-2 {
-        fill: #1f66cc;
-      }
-
-      .cls-3 {
-        fill: #1b8eea;
-      }
-
-      .cls-4 {
-        fill: #fff;
-      }
+      .cls-1 { fill: #30a5ff; }
+      .cls-2 { fill: #1f66cc; }
+      .cls-3 { fill: #1b8eea; }
+      .cls-4 { fill: #fff; }
     </style>
   </defs>
   <polygon class="cls-2" points="0 10.3 0 195.7 19.59 206 19.59 20.6 0 10.3"/>
@@ -814,7 +824,6 @@
     <polygon points="4.00,64.00 90.60,114.00 90.60,104.00 4.00,54.00" fill="none" stroke="#ffffff" stroke-width="1.68"/>
     <polygon points="177.21,64.00 90.60,114.00 90.60,104.00 177.21,54.00" fill="none" stroke="#ffffff" stroke-width="1.68"/>
     <polygon points="90.60,4.00 177.21,54.00 90.60,104.00 4.00,54.00" fill="none" stroke="#ffffff" stroke-width="1.68"/>
-  
 </svg>`;
 
   // ✅ REPLACED with your uploaded thousand_base_ten_block.svg
@@ -839,7 +848,6 @@
     <polygon points="4.00,124.00 73.28,164.00 73.28,84.00 4.00,44.00" fill="none" stroke="#ffffff" stroke-width="1.4"/>
     <polygon points="142.56,124.00 73.28,164.00 73.28,84.00 142.56,44.00" fill="none" stroke="#ffffff" stroke-width="1.4"/>
     <polygon points="73.28,4.00 142.56,44.00 73.28,84.00 4.00,44.00" fill="none" stroke="#ffffff" stroke-width="1.4"/>
-  
 </svg>`;
 
   let __svgSeq = 0;
@@ -913,13 +921,12 @@
 
   // card digit fit helper
   function cardSizing(len){
-  if (len <= 4) return { fs: 26, gap: 14, minw: 0.90 };
-  if (len === 5) return { fs: 24, gap: 12, minw: 0.88 };
-  if (len === 6) return { fs: 22, gap: 10, minw: 0.84 };
-  if (len === 7) return { fs: 18, gap: 6,  minw: 0.78 }; // ✅ 9,000,000 fits
-  return            { fs: 16, gap: 5,  minw: 0.74 };     // ✅ 10,000,000 fits
-}
-
+    if (len <= 4) return { fs: 26, gap: 14, minw: 0.90 };
+    if (len === 5) return { fs: 24, gap: 12, minw: 0.88 };
+    if (len === 6) return { fs: 22, gap: 10, minw: 0.84 };
+    if (len === 7) return { fs: 18, gap: 6,  minw: 0.78 }; // ✅ 9,000,000 fits
+    return            { fs: 16, gap: 5,  minw: 0.74 };     // ✅ 10,000,000 fits
+  }
 
   // UI
   const panelGrid = $("panelGrid");
@@ -957,32 +964,38 @@
   const btnTogether = $("btnTogether");
   const btnToggleCards = $("btnToggleCards");
   const btnToggleExpanded = $("btnToggleExpanded");
-const chartWrap = $("chartWrap");
-const toggleChart = $("toggleChart");
+  const chartWrap = $("chartWrap");
+  const toggleChart = $("toggleChart");
 
-/* ✅ step controls */
-const stepInput = $("stepInput");
-const incStepBtn = $("incStep");
-const decStepBtn = $("decStep");
+  /* ✅ step controls */
+  const stepInput = $("stepInput");
+  const incStepBtn = $("incStep");
+  const decStepBtn = $("decStep");
 
-let chartVisible = true;
-function applyChartVisibility(){
-  chartWrap.style.display = chartVisible ? "block" : "none";
-  toggleChart.textContent = chartVisible ? "📊" : "📈";
-  toggleChart.title = chartVisible ? "Hide Chart" : "Show Chart";
-}
-toggleChart.addEventListener("click", () => {
-  chartVisible = !chartVisible;
-  applyChartVisibility();
-  requestAnimationFrame(() => fitAllPanels());
-});
+  /* ✅ regrouping animation layer */
+  const animLayer = $("animLayer");
 
+  let chartVisible = true;
+  function applyChartVisibility(){
+    chartWrap.style.display = chartVisible ? "block" : "none";
+    toggleChart.textContent = chartVisible ? "📊" : "📈";
+    toggleChart.title = chartVisible ? "Hide Chart" : "Show Chart";
+  }
+  toggleChart.addEventListener("click", () => {
+    chartVisible = !chartVisible;
+    applyChartVisibility();
+    requestAnimationFrame(() => fitAllPanels());
+  });
 
   let cardsVisible = true;
   let expandedVisible = true;
   let cardsView = "apart";
   let preferredMode = "auto";
   let toastTimer = null;
+
+  /* ✅ current number tracking for regrouping */
+  let currentN = 0;
+  let isAnimating = false;
 
   function clampInt(n, min, max){
     n = parseInt(n,10);
@@ -1165,6 +1178,356 @@ toggleChart.addEventListener("click", () => {
     btnToggleExpanded.textContent = expandedVisible ? "Hide Expanded" : "Show Expanded";
   }
 
+  /* ===========================
+     ✅ SOUND (click + swoosh)
+     =========================== */
+  let audioCtx = null;
+  function ensureAudio(){
+    if (audioCtx) return audioCtx;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtx = new Ctx();
+    return audioCtx;
+  }
+  function resumeAudioIfNeeded(){
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    if (ctx.state === "suspended") ctx.resume().catch(()=>{});
+  }
+  window.addEventListener("pointerdown", resumeAudioIfNeeded, { once:false, passive:true });
+
+  function playClick(){
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t0 = ctx.currentTime;
+
+    // pop
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "square";
+    o.frequency.setValueAtTime(750, t0);
+    o.frequency.exponentialRampToValueAtTime(260, t0 + 0.03);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.22, t0 + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.06);
+    o.connect(g).connect(ctx.destination);
+    o.start(t0);
+    o.stop(t0 + 0.07);
+
+    // tiny noise tick
+    const bufferSize = Math.floor(ctx.sampleRate * 0.03);
+    const buf = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i=0;i<bufferSize;i++){
+      data[i] = (Math.random()*2-1) * (1 - i/bufferSize);
+    }
+    const n = ctx.createBufferSource(); n.buffer = buf;
+    const ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.0001, t0);
+    ng.gain.exponentialRampToValueAtTime(0.12, t0 + 0.004);
+    ng.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.03);
+    n.connect(ng).connect(ctx.destination);
+    n.start(t0);
+    n.stop(t0 + 0.035);
+  }
+
+  function playSwoosh(){
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t0 = ctx.currentTime;
+
+    const dur = 0.22;
+    const bufferSize = Math.floor(ctx.sampleRate * dur);
+    const buf = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i=0;i<bufferSize;i++){
+      // shaped noise
+      const x = i / bufferSize;
+      const env = Math.sin(Math.PI * x);
+      data[i] = (Math.random()*2-1) * env * 0.85;
+    }
+    const src = ctx.createBufferSource(); src.buffer = buf;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(900, t0);
+    filter.frequency.exponentialRampToValueAtTime(220, t0 + dur);
+
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.18, t0 + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+    src.connect(filter).connect(g).connect(ctx.destination);
+    src.start(t0);
+    src.stop(t0 + dur + 0.02);
+  }
+
+  /* ===========================
+     ✅ REGROUP / UNGROUP HELPERS
+     =========================== */
+  const placeIndex = Object.fromEntries(PLACES.map((p, i)=>[p.key, i]));
+  function placeByKey(k){ return PLACES.find(p=>p.key===k); }
+
+  function vanishInStage(placeKey){
+    const panel = panelGrid.querySelector(`.pvPanel[data-place="${placeKey}"]`);
+    if (!panel) return;
+    const stage = panel.querySelector(".pvStage");
+    if (!stage) return;
+    stage.querySelectorAll(".blk, .disc").forEach(el => el.classList.add("vanish"));
+  }
+
+  function rectCenter(r){ return { x: r.left + r.width/2, y: r.top + r.height/2 }; }
+
+  function makeToken(placeKey, mode){
+    const p = placeByKey(placeKey);
+    const ghost = document.createElement("div");
+    ghost.className = "ghost";
+
+    const blocksOk = (mode === "blocks") && ["th","h","t","o"].includes(placeKey);
+    if (blocksOk){
+      const blk = document.createElement("div");
+      blk.className = `blk ${blockClass(placeKey)}`;
+      blk.innerHTML = blockSVG(placeKey);
+      ghost.appendChild(blk);
+    } else {
+      // disc token
+      const base = discBaseColor(placeKey);
+      const rim  = darken(base, 0.22);
+      const top  = lighten(base, 0.18);
+      const bot  = darken(base, 0.10);
+      const fill = `linear-gradient(180deg, ${top} 0%, ${base} 55%, ${bot} 100%)`;
+
+      const d = document.createElement("div");
+      d.className = "disc";
+      d.style.setProperty("--disc-fill", fill);
+      d.style.setProperty("--disc-rim", rim);
+      d.textContent = p ? p.value : "";
+      ghost.appendChild(d);
+    }
+    return ghost;
+  }
+
+  function wait(ms){ return new Promise(res => setTimeout(res, ms)); }
+
+  async function animateCarry(fromKey, toKey, modeNow){
+    const fromPanel = panelGrid.querySelector(`.pvPanel[data-place="${fromKey}"] .pvStage`);
+    const toPanel   = panelGrid.querySelector(`.pvPanel[data-place="${toKey}"] .pvStage`);
+    if (!fromPanel || !toPanel) return;
+
+    const fr = fromPanel.getBoundingClientRect();
+    const tr = toPanel.getBoundingClientRect();
+    const fc = rectCenter(fr);
+    const tc = rectCenter(tr);
+
+    // ✅ fade out background items in the source place (clearer regrouping)
+    vanishInStage(fromKey);
+
+    resumeAudioIfNeeded();
+    playClick();
+
+    // 10 little units gather
+    const tokens = [];
+    const spread = Math.min(fr.width, fr.height) * 0.22;
+
+    for (let i=0;i<10;i++){
+      const g = makeToken(fromKey, modeNow);
+      animLayer.appendChild(g);
+      const a = (Math.PI*2) * (i/10);
+      const sx = fc.x + Math.cos(a) * spread + (Math.random()*10-5);
+      const sy = fc.y + Math.sin(a) * spread + (Math.random()*10-5);
+
+      const start = { x:sx, y:sy, s: 0.72 };
+      const end   = { x:fc.x, y:fc.y, s: 0.48 };
+
+      g.animate([
+        { transform:`translate(${start.x}px, ${start.y}px) scale(${start.s})`, opacity: 0.0, filter:"blur(0px)" },
+        { transform:`translate(${start.x}px, ${start.y}px) scale(${start.s})`, opacity: 1.0, filter:"blur(0px)" , offset: 0.15},
+        { transform:`translate(${end.x}px, ${end.y}px) scale(${end.s})`, opacity: 1.0, filter:"blur(0px)" }
+      ], { duration: 320, easing:"cubic-bezier(.2,.9,.2,1)", fill:"forwards" });
+
+      tokens.push(g);
+    }
+
+    await wait(340);
+
+    // merge into 1 next-place unit
+    // merge into 1 next-place unit
+for (const t of tokens){
+  t.animate(
+    [
+      { opacity: 1, transform: `translate(${fc.x}px, ${fc.y}px) scale(0.48)` },
+      { opacity: 0, transform: `translate(${fc.x}px, ${fc.y}px) scale(0.18)` }
+    ],
+    { duration: 180, easing: "ease-in", fill: "forwards" }
+  );
+}
+
+
+    await wait(140);
+
+    // 1 unit moves to next place
+    const carrier = makeToken(toKey, modeNow);
+    animLayer.appendChild(carrier);
+
+    resumeAudioIfNeeded();
+    playSwoosh();
+
+    const mv = carrier.animate([
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.62)`, opacity: 0.0, filter:"blur(0px)" },
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.62)`, opacity: 1.0, filter:"blur(0px)", offset: 0.10 },
+      { transform:`translate(${tc.x}px, ${tc.y}px) scale(0.75)`, opacity: 1.0, filter:"blur(0px)" }
+    ], { duration: 420, easing:"cubic-bezier(.2,.8,.2,1)", fill:"forwards" });
+
+    try { await mv.finished; } catch(_){}
+
+    // cleanup
+    tokens.forEach(t => t.remove());
+    carrier.remove();
+  }
+
+  async function animateBorrow(fromKey, toKey, modeNow){
+    const fromPanel = panelGrid.querySelector(`.pvPanel[data-place="${fromKey}"] .pvStage`);
+    const toPanel   = panelGrid.querySelector(`.pvPanel[data-place="${toKey}"] .pvStage`);
+    if (!fromPanel || !toPanel) return;
+
+    const fr = fromPanel.getBoundingClientRect();
+    const tr = toPanel.getBoundingClientRect();
+    const fc = rectCenter(fr);
+    const tc = rectCenter(tr);
+
+    // ✅ fade out background items in the source place (clearer ungrouping)
+    vanishInStage(fromKey);
+
+    resumeAudioIfNeeded();
+    playClick();
+
+    // show 1 higher unit (source)
+    const big = makeToken(fromKey, modeNow);
+    animLayer.appendChild(big);
+
+    const pop = big.animate([
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.40)`, opacity:0.0 },
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.78)`, opacity:1.0, offset:0.35 },
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.70)`, opacity:1.0 }
+    ], { duration: 240, easing:"cubic-bezier(.2,.9,.2,1)", fill:"forwards" });
+
+    try { await pop.finished; } catch(_){}
+
+    // split into 10 lower units flying to lower place
+    resumeAudioIfNeeded();
+    playSwoosh();
+
+    const tokens = [];
+    const spread = Math.min(tr.width, tr.height) * 0.22;
+
+    // fade out the big one as it splits
+    big.animate([{opacity:1},{opacity:0, transform:`translate(${fc.x}px, ${fc.y}px) scale(0.2)`}], {duration:140, easing:"ease-in", fill:"forwards"});
+
+    for (let i=0;i<10;i++){
+      const g = makeToken(toKey, modeNow);
+      animLayer.appendChild(g);
+
+      const a = (Math.PI*2) * (i/10);
+      const ex = tc.x + Math.cos(a) * spread + (Math.random()*10-5);
+      const ey = tc.y + Math.sin(a) * spread + (Math.random()*10-5);
+
+      const an = g.animate([
+        { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.38)`, opacity:0.0 },
+        { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.60)`, opacity:1.0, offset:0.12 },
+        { transform:`translate(${ex}px, ${ey}px) scale(0.62)`, opacity:1.0 }
+      ], { duration: 420, easing:"cubic-bezier(.2,.8,.2,1)", fill:"forwards" });
+
+      tokens.push({el:g, anim:an});
+    }
+
+    await wait(460);
+
+    tokens.forEach(t => t.el.remove());
+    big.remove();
+  }
+
+  function computeCarryEvents(oldN, delta){
+    const smallToBig = [...PLACES].slice().reverse(); // ones -> ... -> tm
+    const a = digitsFor(oldN);
+    const b = digitsFor(delta);
+    let carry = 0;
+    const ev = [];
+    for (let i=0;i<smallToBig.length;i++){
+      const k = smallToBig[i].key;
+      const nextK = smallToBig[i+1]?.key;
+      const sum = a[k] + b[k] + carry;
+      const newCarry = Math.floor(sum / 10);
+      if (newCarry > 0 && nextK){
+        ev.push({ type:"carry", from:k, to:nextK });
+      }
+      carry = newCarry;
+    }
+    return ev;
+  }
+
+  function computeBorrowEvents(oldN, delta){
+    const smallToBig = [...PLACES].slice().reverse(); // ones -> ... -> tm
+    const a = digitsFor(oldN);
+    const b = digitsFor(delta);
+    let borrow = 0;
+    const ev = [];
+    for (let i=0;i<smallToBig.length;i++){
+      const k = smallToBig[i].key;
+      const higherK = smallToBig[i+1]?.key;
+      let diff = a[k] - b[k] - borrow;
+      if (diff < 0){
+        borrow = 1;
+        if (higherK){
+          // borrowing happens FROM higherK to k (higher breaks into 10 of k)
+          ev.push({ type:"borrow", from:higherK, to:k });
+        }
+        diff += 10;
+      } else {
+        borrow = 0;
+      }
+    }
+    // show from highest to lowest (clearer splitting chain)
+    ev.sort((x,y) => (placeIndex[x.from] - placeIndex[y.from]));
+    return ev;
+  }
+
+  async function animateAndSet(nextN, delta){
+    if (isAnimating) return;
+    const oldN = currentN;
+    if (nextN === oldN) { numInput.value = nextN; render(); return; }
+
+    // only animate for step button changes (small, deliberate moves)
+    const modeNow = effectiveMode(oldN);
+
+    // compute carry/borrow chain for the step amount
+    const ev = (nextN > oldN) ? computeCarryEvents(oldN, delta) : computeBorrowEvents(oldN, delta);
+
+    if (!ev.length){
+      numInput.value = nextN;
+      render();
+      return;
+    }
+
+    isAnimating = true;
+    document.body.classList.add("animating");
+
+    // run in order: carries (low -> high), borrows already sorted high->low above
+    try{
+      for (const e of ev){
+        if (e.type === "carry") await animateCarry(e.from, e.to, modeNow);
+        else await animateBorrow(e.from, e.to, modeNow);
+      }
+    } finally {
+      // cleanup any leftover ghosts
+      animLayer.innerHTML = "";
+      document.body.classList.remove("animating");
+      isAnimating = false;
+
+      // apply final number after animation
+      numInput.value = nextN;
+      render();
+    }
+  }
+
   function render(){
     let raw = parseInt(numInput.value, 10);
     if (!Number.isFinite(raw)) raw = 0;
@@ -1213,12 +1576,16 @@ toggleChart.addEventListener("click", () => {
       panel.className = "pvPanel";
       panel.style.background = getComputedStyle(document.documentElement).getPropertyValue(place.tint).trim();
 
+      /* ✅ for regrouping animation targeting */
+      panel.dataset.place = place.key;
+
       const label = document.createElement("div");
       label.className = "pvLabel";
       label.textContent = place.name;
 
       const stage = document.createElement("div");
       stage.className = "pvStage";
+      stage.dataset.place = place.key;
 
       const box = document.createElement("div");
       box.className = "fitBox";
@@ -1271,6 +1638,9 @@ toggleChart.addEventListener("click", () => {
     applyCardsVisibility();
 
     requestAnimationFrame(() => fitAllPanels());
+
+    /* ✅ keep current number for next step animation */
+    currentN = n;
   }
 
   // drawer
@@ -1321,13 +1691,13 @@ toggleChart.addEventListener("click", () => {
     requestAnimationFrame(() => fitAllPanels());
   });
 
-  /* ✅ increment / decrement by chosen step */
+  /* ✅ increment / decrement by chosen step (with regrouping / ungrouping animation) */
   function adjustByStep(dir){
     const step = clampInt(stepInput.value, 1, 10000000);
     stepInput.value = step;
     const n = clampInt(numInput.value, 0, 10000000);
-    numInput.value = clampInt(n + (dir * step), 0, 10000000);
-    render();
+    const next = clampInt(n + (dir * step), 0, 10000000);
+    animateAndSet(next, step);
   }
   incStepBtn.addEventListener("click", () => adjustByStep(+1));
   decStepBtn.addEventListener("click", () => adjustByStep(-1));
@@ -1358,9 +1728,3 @@ toggleChart.addEventListener("click", () => {
 </script>
 </body>
 </html>
-```
-
-
-
-
-
