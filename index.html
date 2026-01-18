@@ -4,8 +4,9 @@
 <link rel="icon" href="./kimsze_sharp16.ico?v=20260111a" sizes="any">
 <link rel="shortcut icon" href="./kimsze_sharp16.ico?v=20260111a">
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Place Value — Base Ten Blocks + Place Value Discs</title>
+
 <style>
   :root{
     --bg:#ffffff;
@@ -19,11 +20,9 @@
     --drawerW: min(420px, 92vw);
     --sidePad: 0px;
 
-    /* safe area */
+    /* ✅ iOS safe areas */
     --safeTop: env(safe-area-inset-top, 0px);
-    --safeRight: env(safe-area-inset-right, 0px);
-    --safeBottom: env(safe-area-inset-bottom, 0px);
-    --safeLeft: env(safe-area-inset-left, 0px);
+    --safeBot: env(safe-area-inset-bottom, 0px);
 
     /* place colors (header + panel tint) */
     --c-tm-h:#0b2a6a; --c-tm-t:#e6efff; /* ten millions (very dark blue) */
@@ -43,75 +42,54 @@
 
   *{ box-sizing:border-box; }
   html, body{ height: 100%; }
+
+  /* ✅ KEY FIX: body becomes a flex column. The wrap becomes the scroller. */
   body{
     margin:0;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     background: var(--bg);
     color: var(--ink);
-
-    /* ✅ mobile-friendly: body stays fixed, main area scrolls */
-    overflow: hidden;
-    touch-action: manipulation;
+    overflow: hidden;            /* keep body fixed */
+    display:flex;                /* ✅ */
+    flex-direction: column;      /* ✅ */
   }
 
-  /* ✅ make taps feel better on mobile */
-  button, input{ touch-action: manipulation; }
-  button, .btn, .iconBtn{ -webkit-tap-highlight-color: transparent; }
-
   .topbar{
-    height: 62px;
+    /* ✅ Sticky, but height can grow on phones (wrapping buttons) */
     position: sticky;
     top: 0;
     z-index: 10;
     background: rgba(255,255,255,.92);
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--line);
-
-    /* ✅ safe area + side pad */
-    padding:
-      calc(10px + var(--safeTop))
-      calc(14px + var(--sidePad) + var(--safeRight))
-      10px
-      calc(14px + var(--safeLeft));
-
+    padding: calc(10px + var(--safeTop)) calc(14px + var(--sidePad)) 10px 14px;
     display:flex;
     align-items:center;
     justify-content: space-between;
     gap: 10px;
+    flex: 0 0 auto; /* ✅ */
+    min-height: 62px; /* ✅ */
   }
+
   .title{
     font-weight: 1000;
     letter-spacing: .2px;
     display:flex;
     align-items: baseline;
     gap: 10px;
-
-    /* ✅ allow shrinking on small screens */
-    min-width: 0;
-    flex: 1 1 auto;
+    min-width: 0; /* ✅ allow shrinking on small screens */
   }
-  .title .big{ font-size: 18px; white-space: nowrap; }
-  .title .small{
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 900;
-
-    /* ✅ don’t force overflow */
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+  .title .big{ font-size: 18px; }
+  .title .small{ font-size: 12px; color: var(--muted); font-weight: 900; }
 
   .actions{
     display:flex;
     gap: 10px;
     align-items:center;
-
-    /* ✅ wrap on phones so icons never go off-screen */
-    flex-wrap: wrap;
+    flex-wrap: wrap;     /* ✅ KEY: wrap buttons on small screens */
     justify-content: flex-end;
   }
+
   .pill{
     border: 1px solid var(--line);
     background:#fff;
@@ -126,9 +104,8 @@
     white-space: nowrap;
   }
   .pill strong{ color: var(--ink); }
-
   .iconBtn{
-    width: 44px; height: 44px;     /* ✅ thumb-friendly */
+    width: 40px; height: 40px;
     border-radius: 12px;
     border: 1px solid var(--line);
     background:#fff;
@@ -136,44 +113,31 @@
     font-size: 18px;
     display:grid;
     place-items:center;
+    flex: 0 0 auto;
   }
 
-  /* ✅ MAIN SCROLLER */
+  /* ✅ KEY FIX: wrap becomes the scroll container */
   .wrap{
-    /* ✅ use dvh so iOS browser bars don’t chop content */
-    height: calc(100dvh - 62px);
-    height: calc(100vh - 62px); /* fallback */
+    flex: 1 1 auto;             /* ✅ */
+    min-height: 0;              /* ✅ allows scrolling inside */
     max-width: 1300px;
     margin: 0 auto;
-
-    /* ✅ safe area + side pad */
-    padding:
-      12px
-      calc(14px + var(--sidePad) + var(--safeRight))
-      calc(14px + var(--safeBottom))
-      calc(14px + var(--safeLeft));
-
+    padding: 12px calc(14px + var(--sidePad)) calc(12px + var(--safeBot)) 14px;
     display:flex;
     flex-direction: column;
     gap: 12px;
 
-    /* ✅ allow scrolling to see ALL functions on mobile */
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: auto;             /* ✅ THIS is what prevents cut-off */
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
 
-  /* ✅ grid can be as tall as it needs; scroll happens in .wrap */
   .panelGrid{
+    flex: 0 0 auto;             /* ✅ don't force fill; let page scroll */
     display:grid;
     gap: 14px;
     align-content: start;
-
     grid-template-columns: repeat(var(--cols, 3), 1fr);
-
-    /* ✅ important: no internal clipping */
-    overflow: visible;
   }
 
   .pvPanel{
@@ -182,12 +146,11 @@
     box-shadow: 0 14px 26px rgba(0,0,0,.10);
     display:flex;
     flex-direction: column;
-
-    /* ✅ keep each panel usable on phones */
-    min-height: 180px;
     overflow: hidden;
     min-width: 0;
+    min-height: 220px; /* ✅ ensures stages don’t collapse on phones */
   }
+
   .pvLabel{
     font-weight: 1000;
     font-size: 18px;
@@ -195,14 +158,16 @@
     margin-bottom: 10px;
     line-height: 1.1;
   }
+
   .pvStage{
     flex: 1 1 auto;
     display:flex;
     align-items:center;
     justify-content:center;
     overflow: hidden;
-    min-height: 110px; /* ✅ ensures fitAllPanels has real space */
+    min-height: 0;
   }
+
   .fitBox{
     transform-origin: center bottom;
     will-change: transform;
@@ -252,7 +217,7 @@
 
   /* sized off your uploaded SVG viewBoxes */
   .blk.one      { width: calc(var(--S) * 3.2);  height: calc(var(--S) * 3.6); }
-  .blk.ten      { width: calc(var(--S) * 2.4);  height: calc(var(--S) * 12.0);}
+  .blk.ten      { width: calc(var(--S) * 2.4);  height: calc(var(--S) * 12.0); }
   .blk.hundred  { width: calc(var(--S) * 10.0); height: calc(var(--S) * 6.5); }
   .blk.thousand { width: calc(var(--S) * 7.8);  height: calc(var(--S) * 9.0); }
 
@@ -309,14 +274,12 @@
     pointer-events:none;
   }
 
-  /* ✅ regrouping clarity: vanishing background items */
   .vanish{
     opacity: 0 !important;
     transform: scale(.92) !important;
     filter: blur(.25px) !important;
   }
 
-  /* ✅ animation overlay */
   .animLayer{
     position: fixed;
     inset: 0;
@@ -340,6 +303,7 @@
 
   /* cards + words + expanded */
   .cardsWrap{
+    flex: 0 0 auto;
     border-radius: 22px;
     overflow:hidden;
     box-shadow: 0 14px 26px rgba(0,0,0,.10);
@@ -353,9 +317,7 @@
     justify-content:space-between;
     gap: 10px;
     margin-bottom: 8px;
-
-    /* ✅ allow wrap so buttons don’t disappear */
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* ✅ */
   }
   .cardsTop .h{
     font-weight: 1000;
@@ -372,13 +334,12 @@
   .segMini button{
     border:0;
     background:transparent;
-    padding: 9px 12px;
+    padding: 7px 10px;
     font-weight: 1000;
     font-size: 12px;
     color: var(--muted);
     cursor:pointer;
     white-space:nowrap;
-    min-height: 40px;
   }
   .segMini button.active{
     background:#0f172a;
@@ -392,7 +353,6 @@
     cursor:pointer;
     font-weight: 1000;
     font-size: 13px;
-    min-height: 40px;
   }
   .btn.primary{ background:#0f172a; color:#fff; border-color:#0f172a; }
 
@@ -516,6 +476,7 @@
 
   /* chart */
   .chartWrap{
+    flex: 0 0 auto;
     height: 150px;
     border-radius: 22px;
     overflow:hidden;
@@ -557,7 +518,7 @@
   .drawerBackdrop{
     position: fixed;
     inset: 0;
-    background: rgba(15,23,42,0);   /* ✅ no dimming */
+    background: rgba(15,23,42,0);
     display: none;
     z-index: 20;
   }
@@ -587,6 +548,7 @@
     align-items:center;
     justify-content: space-between;
     gap: 10px;
+    padding-top: calc(12px + var(--safeTop)); /* ✅ */
   }
   .drawerTop .h{ font-weight: 1000; letter-spacing:.2px; }
   .drawerBody{
@@ -595,7 +557,7 @@
     display:flex;
     flex-direction: column;
     gap: 12px;
-    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(14px + var(--safeBot)); /* ✅ */
   }
   .field label{
     font-size: 12px;
@@ -606,10 +568,10 @@
   }
   input[type="number"]{
     width:100%;
-    padding: 12px 12px;
+    padding: 10px 10px;
     border: 1px solid var(--line);
     border-radius: 14px;
-    font-size: 16px; /* ✅ prevents iOS zoom on focus */
+    font-size: 14px;
     outline:none;
   }
   input[type="range"]{ width:100%; }
@@ -623,14 +585,13 @@
   }
   .seg button{
     flex:1;
-    padding: 12px 10px;
+    padding: 10px 10px;
     border:0;
     background: transparent;
     cursor:pointer;
     font-weight: 1000;
     font-size: 13px;
     color: var(--muted);
-    min-height: 44px;
   }
   .seg button.active{
     background:#0f172a;
@@ -653,7 +614,7 @@
   .toast{
     position: fixed;
     left: 50%;
-    bottom: calc(16px + var(--safeBottom)); /* ✅ safe area */
+    bottom: calc(16px + var(--safeBot)); /* ✅ avoid home bar */
     transform: translateX(-50%);
     background: rgba(15,23,42,.92);
     color:#fff;
@@ -673,9 +634,9 @@
     color: var(--muted);
     text-align:right;
     padding-top: 2px;
+    padding-bottom: calc(4px + var(--safeBot)); /* ✅ */
   }
 
-  /* ✅ RESPONSIVE */
   @media (max-width: 980px){
     .wordsLine{ font-size: 18px; }
     .expLine{ font-size: 28px; }
@@ -691,30 +652,19 @@
     .panelGrid{ grid-template-columns: 1fr; }
     .expLine{ font-size: 24px; }
 
-    /* ✅ tighten topbar on very small phones */
-    .topbar{ height: auto; }
+    /* ✅ slightly smaller title so topbar doesn't dominate */
     .title .big{ font-size: 16px; }
-    .actions{ gap: 8px; }
+    .title .small{ font-size: 11px; }
 
-    /* ✅ make settings drawer a bottom sheet on phones */
-    .drawer{
-      left: 0;
-      right: 0;
-      top: auto;
-      bottom: 0;
-      width: 100vw;
-      height: min(92dvh, 92vh);
-      border-left: 0;
-      border-top: 1px solid var(--line);
-      border-radius: 18px 18px 0 0;
-      transform: translateY(105%);
-      box-shadow: 0 -22px 55px rgba(0,0,0,.28);
-    }
-    .drawer.open{ transform: translateY(0); }
+    /* ✅ tighter controls on tiny screens */
+    .pill{ padding: 7px 9px; }
+    .iconBtn{ width: 38px; height: 38px; border-radius: 12px; }
   }
 </style>
+
 <script src="https://cdn.counter.dev/script.js" data-id="825e93b6-ce99-40ef-8bcc-125f13297433" data-utcoffset="8"></script>
 </head>
+
 <body>
 
   <div class="topbar">
@@ -790,7 +740,7 @@
         <div class="btnRow" style="margin-top:10px;">
           <button class="btn" id="decStep" type="button">− Step</button>
           <button class="btn" id="incStep" type="button">+ Step</button>
-        </div>
+               </div>
       </div>
 
       <div class="field">
@@ -847,6 +797,15 @@
     { key:"t",  name:"Tens",              value:10,       label:"10",         head:"--c-t-h",  tint:"--c-t-t"  },
     { key:"o",  name:"Ones",              value:1,        label:"1",          head:"--c-o-h",  tint:"--c-o-t"  },
   ];
+
+  let __svgSeq = 0;
+  function uniquifySvgIds(svgText, prefix){
+    __svgSeq += 1;
+    const suf = `${prefix}__${__svgSeq}`;
+    return svgText
+      .replace(/\bid="([^"]+)"/g, (m, id) => `id="${id}__${suf}"`)
+      .replace(/url\(#([^)]+)\)/g, (m, id) => `url(#${id}__${suf})`);
+  }
 
   // ✅ Embedded SVG raw (from your uploaded files)
   const SVG_ONE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56.5 64">
@@ -937,15 +896,6 @@
     <polygon points="73.28,4.00 142.56,44.00 73.28,84.00 4.00,44.00" fill="none" stroke="#ffffff" stroke-width="1.4"/>
 </svg>`;
 
-  let __svgSeq = 0;
-  function uniquifySvgIds(svgText, prefix){
-    __svgSeq += 1;
-    const suf = `${prefix}__${__svgSeq}`;
-    return svgText
-      .replace(/\bid="([^"]+)"/g, (m, id) => `id="${id}__${suf}"`)
-      .replace(/url\(#([^)]+)\)/g, (m, id) => `url(#${id}__${suf})`);
-  }
-
   function blockSVG(placeKey){
     if (placeKey === "o")  return uniquifySvgIds(SVG_ONE, "one");
     if (placeKey === "t")  return uniquifySvgIds(SVG_TEN, "ten");
@@ -968,7 +918,6 @@
     return "";
   }
 
-  // discs color helpers
   function hexToRgb(hex){
     const m = hex.trim().match(/^#?([0-9a-f]{6})$/i);
     if (!m) return {r:0,g:0,b:0};
@@ -1014,7 +963,6 @@
     return            { fs: 16, gap: 5,  minw: 0.74 };
   }
 
-  // UI
   const panelGrid = $("panelGrid");
   const chartHead = $("chartHead");
   const chartDigits = $("chartDigits");
@@ -1129,7 +1077,6 @@
     });
   }
 
-  // number words (Singapore textbook feel)
   const ONES = ["zero","one","two","three","four","five","six","seven","eight","nine"];
   const TEENS = ["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
   const TENSW = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
@@ -1146,7 +1093,6 @@
     if (!r) return `${ONES[h]} hundred`;
     return `${ONES[h]} hundred and ${wordsUnder100(r)}`;
   }
-
   function numberToWords(n){
     if (n === 0) return "zero";
     if (n < 1000) return wordsUnder1000(n);
@@ -1170,7 +1116,6 @@
     const majorText = major.join(", ");
 
     if (!majorText) return wordsUnder1000(last);
-
     if (last < 100) return `${majorText} and ${wordsUnder100(last)}`;
     return `${majorText}, ${wordsUnder1000(last)}`;
   }
@@ -1259,9 +1204,6 @@
     btnToggleExpanded.textContent = expandedVisible ? "Hide Expanded" : "Show Expanded";
   }
 
-  /* ===========================
-     ✅ SOUND (click + swoosh)
-     =========================== */
   let audioCtx = null;
   function ensureAudio(){
     if (audioCtx) return audioCtx;
@@ -1280,7 +1222,6 @@
   function playClick(){
     const ctx = ensureAudio(); if (!ctx) return;
     const t0 = ctx.currentTime;
-
     const o = ctx.createOscillator();
     const g = ctx.createGain();
     o.type = "square";
@@ -1312,7 +1253,6 @@
   function playSwoosh(){
     const ctx = ensureAudio(); if (!ctx) return;
     const t0 = ctx.currentTime;
-
     const dur = 0.22;
     const bufferSize = Math.floor(ctx.sampleRate * dur);
     const buf = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -1339,9 +1279,6 @@
     src.stop(t0 + dur + 0.02);
   }
 
-  /* ===========================
-     ✅ REGROUP / UNGROUP HELPERS
-     =========================== */
   const placeIndex = Object.fromEntries(PLACES.map((p, i)=>[p.key, i]));
   function placeByKey(k){ return PLACES.find(p=>p.key===k); }
 
@@ -1694,7 +1631,6 @@
     currentN = n;
   }
 
-  // drawer
   function openDrawer(){
     drawer.classList.add("open");
     backdrop.classList.add("open");
