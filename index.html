@@ -4,7 +4,7 @@
 <link rel="icon" href="./kimsze_sharp16.ico?v=20260111a" sizes="any">
 <link rel="shortcut icon" href="./kimsze_sharp16.ico?v=20260111a">
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>Place Value — Base Ten Blocks + Place Value Discs</title>
 <style>
   :root{
@@ -18,6 +18,12 @@
     /* ✅ settings side-space (so it won’t block chart) */
     --drawerW: min(420px, 92vw);
     --sidePad: 0px;
+
+    /* safe area */
+    --safeTop: env(safe-area-inset-top, 0px);
+    --safeRight: env(safe-area-inset-right, 0px);
+    --safeBottom: env(safe-area-inset-bottom, 0px);
+    --safeLeft: env(safe-area-inset-left, 0px);
 
     /* place colors (header + panel tint) */
     --c-tm-h:#0b2a6a; --c-tm-t:#e6efff; /* ten millions (very dark blue) */
@@ -42,8 +48,15 @@
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     background: var(--bg);
     color: var(--ink);
+
+    /* ✅ mobile-friendly: body stays fixed, main area scrolls */
     overflow: hidden;
+    touch-action: manipulation;
   }
+
+  /* ✅ make taps feel better on mobile */
+  button, input{ touch-action: manipulation; }
+  button, .btn, .iconBtn{ -webkit-tap-highlight-color: transparent; }
 
   .topbar{
     height: 62px;
@@ -53,7 +66,14 @@
     background: rgba(255,255,255,.92);
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--line);
-    padding: 10px calc(14px + var(--sidePad)) 10px 14px; /* ✅ */
+
+    /* ✅ safe area + side pad */
+    padding:
+      calc(10px + var(--safeTop))
+      calc(14px + var(--sidePad) + var(--safeRight))
+      10px
+      calc(14px + var(--safeLeft));
+
     display:flex;
     align-items:center;
     justify-content: space-between;
@@ -65,12 +85,33 @@
     display:flex;
     align-items: baseline;
     gap: 10px;
-    min-width: 260px;
-  }
-  .title .big{ font-size: 18px; }
-  .title .small{ font-size: 12px; color: var(--muted); font-weight: 900; }
 
-  .actions{ display:flex; gap: 10px; align-items:center; }
+    /* ✅ allow shrinking on small screens */
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .title .big{ font-size: 18px; white-space: nowrap; }
+  .title .small{
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 900;
+
+    /* ✅ don’t force overflow */
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .actions{
+    display:flex;
+    gap: 10px;
+    align-items:center;
+
+    /* ✅ wrap on phones so icons never go off-screen */
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
   .pill{
     border: 1px solid var(--line);
     background:#fff;
@@ -85,8 +126,9 @@
     white-space: nowrap;
   }
   .pill strong{ color: var(--ink); }
+
   .iconBtn{
-    width: 40px; height: 40px;
+    width: 44px; height: 44px;     /* ✅ thumb-friendly */
     border-radius: 12px;
     border: 1px solid var(--line);
     background:#fff;
@@ -96,32 +138,53 @@
     place-items:center;
   }
 
+  /* ✅ MAIN SCROLLER */
   .wrap{
-    height: calc(100vh - 62px);
+    /* ✅ use dvh so iOS browser bars don’t chop content */
+    height: calc(100dvh - 62px);
+    height: calc(100vh - 62px); /* fallback */
     max-width: 1300px;
     margin: 0 auto;
-    padding: 12px calc(14px + var(--sidePad)) 10px 14px; /* ✅ */
+
+    /* ✅ safe area + side pad */
+    padding:
+      12px
+      calc(14px + var(--sidePad) + var(--safeRight))
+      calc(14px + var(--safeBottom))
+      calc(14px + var(--safeLeft));
+
     display:flex;
     flex-direction: column;
     gap: 12px;
-    overflow: hidden;
+
+    /* ✅ allow scrolling to see ALL functions on mobile */
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
+  /* ✅ grid can be as tall as it needs; scroll happens in .wrap */
   .panelGrid{
-    flex: 1 1 auto;
     display:grid;
     gap: 14px;
-    align-content: stretch;
-    overflow: hidden;
+    align-content: start;
+
     grid-template-columns: repeat(var(--cols, 3), 1fr);
-    min-height: 0;
+
+    /* ✅ important: no internal clipping */
+    overflow: visible;
   }
+
   .pvPanel{
     border-radius: 24px;
     padding: 14px;
     box-shadow: 0 14px 26px rgba(0,0,0,.10);
     display:flex;
     flex-direction: column;
+
+    /* ✅ keep each panel usable on phones */
+    min-height: 180px;
     overflow: hidden;
     min-width: 0;
   }
@@ -138,7 +201,7 @@
     align-items:center;
     justify-content:center;
     overflow: hidden;
-    min-height: 0;
+    min-height: 110px; /* ✅ ensures fitAllPanels has real space */
   }
   .fitBox{
     transform-origin: center bottom;
@@ -224,7 +287,7 @@
       inset 0 -6px 10px rgba(0,0,0,.10);
     position: relative;
     user-select:none;
-    transition: opacity .22s ease, transform .22s ease, filter .22s ease; /* ✅ */
+    transition: opacity .22s ease, transform .22s ease, filter .22s ease;
   }
   .disc::before{
     content:"";
@@ -277,7 +340,6 @@
 
   /* cards + words + expanded */
   .cardsWrap{
-    flex: 0 0 auto;
     border-radius: 22px;
     overflow:hidden;
     box-shadow: 0 14px 26px rgba(0,0,0,.10);
@@ -291,6 +353,9 @@
     justify-content:space-between;
     gap: 10px;
     margin-bottom: 8px;
+
+    /* ✅ allow wrap so buttons don’t disappear */
+    flex-wrap: wrap;
   }
   .cardsTop .h{
     font-weight: 1000;
@@ -307,12 +372,13 @@
   .segMini button{
     border:0;
     background:transparent;
-    padding: 7px 10px;
+    padding: 9px 12px;
     font-weight: 1000;
     font-size: 12px;
     color: var(--muted);
     cursor:pointer;
     white-space:nowrap;
+    min-height: 40px;
   }
   .segMini button.active{
     background:#0f172a;
@@ -326,6 +392,7 @@
     cursor:pointer;
     font-weight: 1000;
     font-size: 13px;
+    min-height: 40px;
   }
   .btn.primary{ background:#0f172a; color:#fff; border-color:#0f172a; }
 
@@ -386,11 +453,10 @@
     transform: none;
     white-space: nowrap;
   }
-  .pvCard{ --pv-minw: 0.9em; } /* ✅ default */
-
+  .pvCard{ --pv-minw: 0.9em; }
   .pvCard .digits span{
     display:inline-block;
-    min-width: var(--pv-minw); /* ✅ adjustable per card */
+    min-width: var(--pv-minw);
     text-align:center;
   }
 
@@ -450,7 +516,6 @@
 
   /* chart */
   .chartWrap{
-    flex: 0 0 auto;
     height: 150px;
     border-radius: 22px;
     overflow:hidden;
@@ -489,33 +554,32 @@
   .chartDigits .cell:last-child{ border-right:0; }
 
   /* drawer */
-.drawerBackdrop{
-  position: fixed;
-  inset: 0;
-  background: rgba(15,23,42,0);   /* ✅ no dimming */
-  display: none;
-  z-index: 20;
-}
-.drawerBackdrop.open{ display:block; } /* ✅ MUST keep this */
-
-.drawer{
-  position: fixed;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: var(--drawerW);
-  background: #fff;
-  border-left: 1px solid var(--line);
-  box-shadow: -22px 0 55px rgba(0,0,0,.28); /* ✅ more visible */
-  transform: translateX(100%);
-  transition: transform .22s ease;
-  z-index: 21; /* ✅ above backdrop */
-  display:flex;
-  flex-direction: column;
-}
-.drawer.open{ transform: translateX(0); }
-
+  .drawerBackdrop{
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0);   /* ✅ no dimming */
+    display: none;
+    z-index: 20;
+  }
   .drawerBackdrop.open{ display:block; }
+
+  .drawer{
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: var(--drawerW);
+    background: #fff;
+    border-left: 1px solid var(--line);
+    box-shadow: -22px 0 55px rgba(0,0,0,.28);
+    transform: translateX(100%);
+    transition: transform .22s ease;
+    z-index: 21;
+    display:flex;
+    flex-direction: column;
+  }
+  .drawer.open{ transform: translateX(0); }
+
   .drawerTop{
     padding: 12px 14px;
     border-bottom: 1px solid var(--line);
@@ -531,6 +595,7 @@
     display:flex;
     flex-direction: column;
     gap: 12px;
+    -webkit-overflow-scrolling: touch;
   }
   .field label{
     font-size: 12px;
@@ -541,10 +606,10 @@
   }
   input[type="number"]{
     width:100%;
-    padding: 10px 10px;
+    padding: 12px 12px;
     border: 1px solid var(--line);
     border-radius: 14px;
-    font-size: 14px;
+    font-size: 16px; /* ✅ prevents iOS zoom on focus */
     outline:none;
   }
   input[type="range"]{ width:100%; }
@@ -558,13 +623,14 @@
   }
   .seg button{
     flex:1;
-    padding: 10px 10px;
+    padding: 12px 10px;
     border:0;
     background: transparent;
     cursor:pointer;
     font-weight: 1000;
     font-size: 13px;
     color: var(--muted);
+    min-height: 44px;
   }
   .seg button.active{
     background:#0f172a;
@@ -587,7 +653,7 @@
   .toast{
     position: fixed;
     left: 50%;
-    bottom: 16px;
+    bottom: calc(16px + var(--safeBottom)); /* ✅ safe area */
     transform: translateX(-50%);
     background: rgba(15,23,42,.92);
     color:#fff;
@@ -609,6 +675,7 @@
     padding-top: 2px;
   }
 
+  /* ✅ RESPONSIVE */
   @media (max-width: 980px){
     .wordsLine{ font-size: 18px; }
     .expLine{ font-size: 28px; }
@@ -623,6 +690,27 @@
   @media (max-width: 520px){
     .panelGrid{ grid-template-columns: 1fr; }
     .expLine{ font-size: 24px; }
+
+    /* ✅ tighten topbar on very small phones */
+    .topbar{ height: auto; }
+    .title .big{ font-size: 16px; }
+    .actions{ gap: 8px; }
+
+    /* ✅ make settings drawer a bottom sheet on phones */
+    .drawer{
+      left: 0;
+      right: 0;
+      top: auto;
+      bottom: 0;
+      width: 100vw;
+      height: min(92dvh, 92vh);
+      border-left: 0;
+      border-top: 1px solid var(--line);
+      border-radius: 18px 18px 0 0;
+      transform: translateY(105%);
+      box-shadow: 0 -22px 55px rgba(0,0,0,.28);
+    }
+    .drawer.open{ transform: translateY(0); }
   }
 </style>
 <script src="https://cdn.counter.dev/script.js" data-id="825e93b6-ce99-40ef-8bcc-125f13297433" data-utcoffset="8"></script>
@@ -640,7 +728,6 @@
       <div class="pill"><span>Mode:</span><strong id="modeRead">Blocks</strong></div>
       <button class="iconBtn" id="toggleChart" title="Hide/Show Chart">📊</button>
       <button class="iconBtn" id="openSettings" title="Show/Hide Settings">⚙️</button>
-
     </div>
   </div>
 
@@ -907,7 +994,7 @@
     if (placeKey === "tt") return "#ef4444";
     if (placeKey === "ht") return "#2563eb";
     if (placeKey === "m")  return "#7c3aed";
-    if (placeKey === "tm") return "#0b2a6a"; // ✅ very dark blue
+    if (placeKey === "tm") return "#0b2a6a";
     return "#64748b";
   }
   function discHTML(place){
@@ -919,13 +1006,12 @@
     return `<div class="disc" style="--disc-fill:${fill}; --disc-rim:${rim};">${place.value}</div>`;
   }
 
-  // card digit fit helper
   function cardSizing(len){
     if (len <= 4) return { fs: 26, gap: 14, minw: 0.90 };
     if (len === 5) return { fs: 24, gap: 12, minw: 0.88 };
     if (len === 6) return { fs: 22, gap: 10, minw: 0.84 };
-    if (len === 7) return { fs: 18, gap: 6,  minw: 0.78 }; // ✅ 9,000,000 fits
-    return            { fs: 16, gap: 5,  minw: 0.74 };     // ✅ 10,000,000 fits
+    if (len === 7) return { fs: 18, gap: 6,  minw: 0.78 };
+    return            { fs: 16, gap: 5,  minw: 0.74 };
   }
 
   // UI
@@ -967,12 +1053,10 @@
   const chartWrap = $("chartWrap");
   const toggleChart = $("toggleChart");
 
-  /* ✅ step controls */
   const stepInput = $("stepInput");
   const incStepBtn = $("incStep");
   const decStepBtn = $("decStep");
 
-  /* ✅ regrouping animation layer */
   const animLayer = $("animLayer");
 
   let chartVisible = true;
@@ -993,7 +1077,6 @@
   let preferredMode = "auto";
   let toastTimer = null;
 
-  /* ✅ current number tracking for regrouping */
   let currentN = 0;
   let isAnimating = false;
 
@@ -1014,7 +1097,7 @@
     return PLACES.slice(first);
   }
   function effectiveMode(n){
-    if (n >= 10000) return "discs"; // ✅ 10,000 uses discs
+    if (n >= 10000) return "discs";
     if (preferredMode === "discs") return "discs";
     if (preferredMode === "blocks") return "blocks";
     return "blocks";
@@ -1064,21 +1147,19 @@
     return `${ONES[h]} hundred and ${wordsUnder100(r)}`;
   }
 
-  // ✅ up to 10,000,000 only
-  // ✅ commas between groups, but NO comma before "and" (when final remainder < 100)
   function numberToWords(n){
     if (n === 0) return "zero";
     if (n < 1000) return wordsUnder1000(n);
     if (n === 10000000) return "ten million";
 
-    const tm = Math.floor(n / 10000000); // 0..1
+    const tm = Math.floor(n / 10000000);
     const remTM = n % 10000000;
 
-    const m = Math.floor(remTM / 1000000); // 0..9
+    const m = Math.floor(remTM / 1000000);
     const remM = remTM % 1000000;
 
-    const th = Math.floor(remM / 1000); // 0..999
-    const last = remM % 1000;           // 0..999
+    const th = Math.floor(remM / 1000);
+    const last = remM % 1000;
 
     const major = [];
     if (tm) major.push("ten million");
@@ -1200,7 +1281,6 @@
     const ctx = ensureAudio(); if (!ctx) return;
     const t0 = ctx.currentTime;
 
-    // pop
     const o = ctx.createOscillator();
     const g = ctx.createGain();
     o.type = "square";
@@ -1213,7 +1293,6 @@
     o.start(t0);
     o.stop(t0 + 0.07);
 
-    // tiny noise tick
     const bufferSize = Math.floor(ctx.sampleRate * 0.03);
     const buf = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buf.getChannelData(0);
@@ -1239,7 +1318,6 @@
     const buf = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buf.getChannelData(0);
     for (let i=0;i<bufferSize;i++){
-      // shaped noise
       const x = i / bufferSize;
       const env = Math.sin(Math.PI * x);
       data[i] = (Math.random()*2-1) * env * 0.85;
@@ -1289,7 +1367,6 @@
       blk.innerHTML = blockSVG(placeKey);
       ghost.appendChild(blk);
     } else {
-      // disc token
       const base = discBaseColor(placeKey);
       const rim  = darken(base, 0.22);
       const top  = lighten(base, 0.18);
@@ -1318,13 +1395,11 @@
     const fc = rectCenter(fr);
     const tc = rectCenter(tr);
 
-    // ✅ fade out background items in the source place (clearer regrouping)
     vanishInStage(fromKey);
 
     resumeAudioIfNeeded();
     playClick();
 
-    // 10 little units gather
     const tokens = [];
     const spread = Math.min(fr.width, fr.height) * 0.22;
 
@@ -1349,22 +1424,18 @@
 
     await wait(340);
 
-    // merge into 1 next-place unit
-    // merge into 1 next-place unit
-for (const t of tokens){
-  t.animate(
-    [
-      { opacity: 1, transform: `translate(${fc.x}px, ${fc.y}px) scale(0.48)` },
-      { opacity: 0, transform: `translate(${fc.x}px, ${fc.y}px) scale(0.18)` }
-    ],
-    { duration: 180, easing: "ease-in", fill: "forwards" }
-  );
-}
-
+    for (const t of tokens){
+      t.animate(
+        [
+          { opacity: 1, transform: `translate(${fc.x}px, ${fc.y}px) scale(0.48)` },
+          { opacity: 0, transform: `translate(${fc.x}px, ${fc.y}px) scale(0.18)` }
+        ],
+        { duration: 180, easing: "ease-in", fill: "forwards" }
+      );
+    }
 
     await wait(140);
 
-    // 1 unit moves to next place
     const carrier = makeToken(toKey, modeNow);
     animLayer.appendChild(carrier);
 
@@ -1379,7 +1450,6 @@ for (const t of tokens){
 
     try { await mv.finished; } catch(_){}
 
-    // cleanup
     tokens.forEach(t => t.remove());
     carrier.remove();
   }
@@ -1394,13 +1464,11 @@ for (const t of tokens){
     const fc = rectCenter(fr);
     const tc = rectCenter(tr);
 
-    // ✅ fade out background items in the source place (clearer ungrouping)
     vanishInStage(fromKey);
 
     resumeAudioIfNeeded();
     playClick();
 
-    // show 1 higher unit (source)
     const big = makeToken(fromKey, modeNow);
     animLayer.appendChild(big);
 
@@ -1412,14 +1480,12 @@ for (const t of tokens){
 
     try { await pop.finished; } catch(_){}
 
-    // split into 10 lower units flying to lower place
     resumeAudioIfNeeded();
     playSwoosh();
 
     const tokens = [];
     const spread = Math.min(tr.width, tr.height) * 0.22;
 
-    // fade out the big one as it splits
     big.animate([{opacity:1},{opacity:0, transform:`translate(${fc.x}px, ${fc.y}px) scale(0.2)`}], {duration:140, easing:"ease-in", fill:"forwards"});
 
     for (let i=0;i<10;i++){
@@ -1430,23 +1496,23 @@ for (const t of tokens){
       const ex = tc.x + Math.cos(a) * spread + (Math.random()*10-5);
       const ey = tc.y + Math.sin(a) * spread + (Math.random()*10-5);
 
-      const an = g.animate([
+      g.animate([
         { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.38)`, opacity:0.0 },
         { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.60)`, opacity:1.0, offset:0.12 },
         { transform:`translate(${ex}px, ${ey}px) scale(0.62)`, opacity:1.0 }
       ], { duration: 420, easing:"cubic-bezier(.2,.8,.2,1)", fill:"forwards" });
 
-      tokens.push({el:g, anim:an});
+      tokens.push(g);
     }
 
     await wait(460);
 
-    tokens.forEach(t => t.el.remove());
+    tokens.forEach(t => t.remove());
     big.remove();
   }
 
   function computeCarryEvents(oldN, delta){
-    const smallToBig = [...PLACES].slice().reverse(); // ones -> ... -> tm
+    const smallToBig = [...PLACES].slice().reverse();
     const a = digitsFor(oldN);
     const b = digitsFor(delta);
     let carry = 0;
@@ -1465,7 +1531,7 @@ for (const t of tokens){
   }
 
   function computeBorrowEvents(oldN, delta){
-    const smallToBig = [...PLACES].slice().reverse(); // ones -> ... -> tm
+    const smallToBig = [...PLACES].slice().reverse();
     const a = digitsFor(oldN);
     const b = digitsFor(delta);
     let borrow = 0;
@@ -1477,7 +1543,6 @@ for (const t of tokens){
       if (diff < 0){
         borrow = 1;
         if (higherK){
-          // borrowing happens FROM higherK to k (higher breaks into 10 of k)
           ev.push({ type:"borrow", from:higherK, to:k });
         }
         diff += 10;
@@ -1485,7 +1550,6 @@ for (const t of tokens){
         borrow = 0;
       }
     }
-    // show from highest to lowest (clearer splitting chain)
     ev.sort((x,y) => (placeIndex[x.from] - placeIndex[y.from]));
     return ev;
   }
@@ -1495,10 +1559,7 @@ for (const t of tokens){
     const oldN = currentN;
     if (nextN === oldN) { numInput.value = nextN; render(); return; }
 
-    // only animate for step button changes (small, deliberate moves)
     const modeNow = effectiveMode(oldN);
-
-    // compute carry/borrow chain for the step amount
     const ev = (nextN > oldN) ? computeCarryEvents(oldN, delta) : computeBorrowEvents(oldN, delta);
 
     if (!ev.length){
@@ -1510,19 +1571,16 @@ for (const t of tokens){
     isAnimating = true;
     document.body.classList.add("animating");
 
-    // run in order: carries (low -> high), borrows already sorted high->low above
     try{
       for (const e of ev){
         if (e.type === "carry") await animateCarry(e.from, e.to, modeNow);
         else await animateBorrow(e.from, e.to, modeNow);
       }
     } finally {
-      // cleanup any leftover ghosts
       animLayer.innerHTML = "";
       document.body.classList.remove("animating");
       isAnimating = false;
 
-      // apply final number after animation
       numInput.value = nextN;
       render();
     }
@@ -1541,7 +1599,6 @@ for (const t of tokens){
     const n = raw;
     numInput.value = n;
 
-    /* ✅ keep numInput arrows aligned to chosen step */
     const step = clampInt(stepInput.value, 1, 10000000);
     stepInput.value = step;
     numInput.step = String(step);
@@ -1567,7 +1624,6 @@ for (const t of tokens){
       showToast("Number ≥ 10,000 → switching to Discs automatically.");
     }
 
-    // panels
     panelGrid.innerHTML = "";
     act.forEach(place => {
       const digit = digs[place.key];
@@ -1575,8 +1631,6 @@ for (const t of tokens){
       const panel = document.createElement("div");
       panel.className = "pvPanel";
       panel.style.background = getComputedStyle(document.documentElement).getPropertyValue(place.tint).trim();
-
-      /* ✅ for regrouping animation targeting */
       panel.dataset.place = place.key;
 
       const label = document.createElement("div");
@@ -1617,7 +1671,6 @@ for (const t of tokens){
       panelGrid.appendChild(panel);
     });
 
-    // chart
     chartHead.innerHTML = "";
     chartDigits.innerHTML = "";
     act.forEach(place => {
@@ -1638,8 +1691,6 @@ for (const t of tokens){
     applyCardsVisibility();
 
     requestAnimationFrame(() => fitAllPanels());
-
-    /* ✅ keep current number for next step animation */
     currentN = n;
   }
 
@@ -1648,14 +1699,14 @@ for (const t of tokens){
     drawer.classList.add("open");
     backdrop.classList.add("open");
     drawer.setAttribute("aria-hidden","false");
-    document.body.classList.add("settings-open"); /* ✅ reserve space */
+    document.body.classList.add("settings-open");
     requestAnimationFrame(() => fitAllPanels());
   }
   function closeDrawer(){
     drawer.classList.remove("open");
     backdrop.classList.remove("open");
     drawer.setAttribute("aria-hidden","true");
-    document.body.classList.remove("settings-open"); /* ✅ */
+    document.body.classList.remove("settings-open");
     requestAnimationFrame(() => fitAllPanels());
   }
   function toggleDrawer(){
@@ -1663,11 +1714,10 @@ for (const t of tokens){
     else openDrawer();
   }
 
-  openSettings.addEventListener("click", toggleDrawer); /* ✅ hide/show */
+  openSettings.addEventListener("click", toggleDrawer);
   closeSettings.addEventListener("click", closeDrawer);
   backdrop.addEventListener("click", closeDrawer);
 
-  // mode buttons
   btnDiscs.addEventListener("click", () => { preferredMode = "discs"; render(); });
   btnBlocks.addEventListener("click", () => {
     const n = clampInt(numInput.value, 0, 10000000);
@@ -1675,7 +1725,6 @@ for (const t of tokens){
     else showToast("Blocks only available when number < 10,000.");
   });
 
-  // cards view buttons
   btnApart.addEventListener("click", () => { cardsView = "apart"; renderCardsView(); });
   btnTogether.addEventListener("click", () => { cardsView = "together"; renderCardsView(); });
 
@@ -1691,7 +1740,6 @@ for (const t of tokens){
     requestAnimationFrame(() => fitAllPanels());
   });
 
-  /* ✅ increment / decrement by chosen step (with regrouping / ungrouping animation) */
   function adjustByStep(dir){
     const step = clampInt(stepInput.value, 1, 10000000);
     stepInput.value = step;
@@ -1703,14 +1751,12 @@ for (const t of tokens){
   decStepBtn.addEventListener("click", () => adjustByStep(-1));
   stepInput.addEventListener("input", render);
 
-  // settings actions
   apply.addEventListener("click", () => { render(); closeDrawer(); });
   clearBtn.addEventListener("click", () => { numInput.value = 0; preferredMode = "auto"; render(); });
   randSmall.addEventListener("click", () => { numInput.value = Math.floor(Math.random()*10000); preferredMode="auto"; render(); });
   randBig.addEventListener("click", () => { numInput.value = Math.floor(Math.random()*10000001); preferredMode="auto"; render(); });
   numInput.addEventListener("input", render);
 
-  // size slider
   size.addEventListener("input", () => {
     const v = clampInt(size.value, 9, 16);
     document.documentElement.style.setProperty("--S", v + "px");
