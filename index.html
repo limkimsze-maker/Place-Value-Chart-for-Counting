@@ -1732,7 +1732,8 @@
 
   btnToggleCards.addEventListener("click", () => {
     cardsVisible = !cardsVisible;
-    if (!cardsVisible) expandedVisible = true;
+    // Keep expanded form exactly as the teacher last set it.
+    // Hiding cards should not automatically reveal the answer.
     applyCardsVisibility();
     requestAnimationFrame(() => fitAllPanels());
   });
