@@ -551,7 +551,7 @@
     display:block;
     margin-bottom: 6px;
   }
-  input[type="number"]{
+  input[type="number"], input[type="text"], input[type="password"]{
     width:100%;
     padding: 10px 10px;
     border: 1px solid var(--line);
@@ -675,6 +675,9 @@
           <button id="btnToggleExpanded" type="button" class="btn" style="padding:7px 10px; border-radius:999px;">
             Hide Expanded
           </button>
+          <button id="btnToggleChartText" type="button" class="btn" style="padding:7px 10px; border-radius:999px;">
+            Hide Chart
+          </button>
         </div>
       </div>
 
@@ -705,7 +708,10 @@
     <div class="drawerBody">
       <div class="field">
         <label>Number (0 to 10,000,000)</label>
-        <input id="numInput" type="number" min="0" max="10000000" step="1" value="3241" />
+        <input id="numInput" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="3241" />
+        <div class="btnRow" style="margin-top:10px;">
+          <button class="btn" id="toggleNumberInput" type="button">Show Number</button>
+        </div>
       </div>
 
       <!-- ✅ Increment/Decrement controls -->
@@ -989,8 +995,10 @@
   const btnTogether = $("btnTogether");
   const btnToggleCards = $("btnToggleCards");
   const btnToggleExpanded = $("btnToggleExpanded");
+  const btnToggleChartText = $("btnToggleChartText");
   const chartWrap = $("chartWrap");
   const toggleChart = $("toggleChart");
+  const toggleNumberInput = $("toggleNumberInput");
 
   /* ✅ step controls */
   const stepInput = $("stepInput");
@@ -1005,12 +1013,17 @@
     chartWrap.style.display = chartVisible ? "block" : "none";
     toggleChart.textContent = chartVisible ? "📊" : "📈";
     toggleChart.title = chartVisible ? "Hide Chart" : "Show Chart";
+    if (btnToggleChartText){
+      btnToggleChartText.textContent = chartVisible ? "Hide Chart" : "Show Chart";
+    }
   }
-  toggleChart.addEventListener("click", () => {
+  function toggleChartVisibility(){
     chartVisible = !chartVisible;
     applyChartVisibility();
     requestAnimationFrame(() => fitAllPanels());
-  });
+  }
+  toggleChart.addEventListener("click", toggleChartVisibility);
+  btnToggleChartText.addEventListener("click", toggleChartVisibility);
 
   let cardsVisible = true;
   let expandedVisible = true;
@@ -1666,6 +1679,20 @@
     currentN = n;
   }
 
+  function hideNumberInput(){
+    numInput.type = "password";
+    toggleNumberInput.textContent = "Show Number";
+  }
+  function showNumberInput(){
+    numInput.type = "text";
+    toggleNumberInput.textContent = "Hide Number";
+  }
+  toggleNumberInput.addEventListener("click", () => {
+    if (numInput.type === "password") showNumberInput();
+    else hideNumberInput();
+    numInput.focus();
+  });
+
   // drawer
   function openDrawer(){
     drawer.classList.add("open");
@@ -1675,6 +1702,7 @@
     requestAnimationFrame(() => fitAllPanels());
   }
   function closeDrawer(){
+    hideNumberInput();
     drawer.classList.remove("open");
     backdrop.classList.remove("open");
     drawer.setAttribute("aria-hidden","true");
