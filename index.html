@@ -265,9 +265,16 @@
 
   /* ✅ added/subtracted unit clarity */
   .newUnit{
-    /* Keep each place colour unique while still highlighting new units */
-    filter: saturate(1.28) brightness(1.14) drop-shadow(0 0 10px rgba(255,255,255,.58)) drop-shadow(0 0 12px rgba(15,23,42,.20)) !important;
+    /* New additions appear in a special colour first, then return to their place colour */
+    filter: saturate(1.35) brightness(1.16) drop-shadow(0 0 12px rgba(34,197,94,.72)) drop-shadow(0 0 10px rgba(15,23,42,.20)) !important;
     transform: scale(1.08) !important;
+  }
+  .newUnit svg .cls-1{ fill:#86efac !important; }
+  .newUnit svg .cls-2{ fill:#047857 !important; }
+  .newUnit svg .cls-3{ fill:#22c55e !important; }
+  .disc.newUnit{
+    --disc-fill: linear-gradient(180deg, #bbf7d0 0%, #22c55e 55%, #16a34a 100%) !important;
+    --disc-rim:#047857 !important;
   }
   .takeawayUnit{
     opacity: 0 !important;
@@ -1336,6 +1343,26 @@
     n.stop(t0 + 0.035);
   }
 
+
+  function playAddUnitSound(index = 0){
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t0 = ctx.currentTime + Math.min(index, 8) * 0.045;
+
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(520 + (index % 5) * 55, t0);
+    o.frequency.exponentialRampToValueAtTime(860 + (index % 5) * 35, t0 + 0.09);
+
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.16, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.14);
+
+    o.connect(g).connect(ctx.destination);
+    o.start(t0);
+    o.stop(t0 + 0.16);
+  }
+
   function playSwoosh(){
     const ctx = ensureAudio(); if (!ctx) return;
     const t0 = ctx.currentTime;
@@ -1547,7 +1574,13 @@
           marked.push(el);
         });
       }
-      setTimeout(() => marked.forEach(el => el.classList.remove("newUnit")), 950);
+
+      if (marked.length){
+        resumeAudioIfNeeded();
+        marked.forEach((_, i) => playAddUnitSound(i));
+      }
+
+      setTimeout(() => marked.forEach(el => el.classList.remove("newUnit")), 1150);
     });
   }
 
@@ -1583,7 +1616,7 @@
 
     if (!ghosts.length) return;
     resumeAudioIfNeeded();
-    playClick();
+    ghosts.forEach((_, i) => playAddUnitSound(i));
     await wait(620);
     ghosts.forEach(g => {
       const body = tokenBody(g);
