@@ -27,10 +27,10 @@
     --c-m-h:#7c3aed;  --c-m-t:#f3e8ff; /* millions */
     --c-ht-h:#2563eb; --c-ht-t:#e0f2fe; /* hundred thousands */
     --c-tt-h:#ef4444; --c-tt-t:#ffe4e6; /* ten thousands */
-    --c-th-h:#8b5cf6; --c-th-t:#ede9fe; /* thousands */
-    --c-h-h:#ec4899;  --c-h-t:#ffe4f1; /* hundreds */
-    --c-t-h:#f59e0b;  --c-t-t:#fff1db; /* tens */
-    --c-o-h:#06b6d4;  --c-o-t:#dff7ff; /* ones */
+    --c-th-h:#8b5cf6; --c-th-t:#f6f1ff; /* thousands */
+    --c-h-h:#ec4899;  --c-h-t:#fff1f7; /* hundreds */
+    --c-t-h:#1d4ed8;  --c-t-t:#eef4ff; /* tens */
+    --c-o-h:#eab308;  --c-o-t:#fffbea; /* ones */
   }
 
   /* ✅ when settings are open, reserve space on the right (desktop) */
@@ -128,6 +128,7 @@
   .pvPanel{
     border-radius: 24px;
     padding: 14px;
+    border: 1px solid rgba(15,23,42,.06);
     box-shadow: 0 14px 26px rgba(0,0,0,.10);
     display:flex;
     flex-direction: column;
@@ -194,7 +195,7 @@
 
   /* blocks */
   .blk{ display:block; position:relative; transition: opacity .75s ease, transform .75s ease, filter .75s ease; }
-  .blk svg{ width: 100%; height: 100%; display:block; }
+  .blk svg{ width: 100%; height: 100%; display:block; filter: drop-shadow(0 8px 12px rgba(15,23,42,.18)); }
 
   /* sized off your uploaded SVG viewBoxes */
   .blk.one      { width: calc(var(--S) * 3.2);  height: calc(var(--S) * 3.6); }
@@ -229,7 +230,7 @@
     border: 3px solid var(--disc-rim);
 
     box-shadow:
-      0 10px 18px rgba(0,0,0,.16),
+      0 12px 20px rgba(15,23,42,.18),
       inset 0 -6px 10px rgba(0,0,0,.10);
     position: relative;
     user-select:none;
@@ -264,7 +265,8 @@
 
   /* ✅ added/subtracted unit clarity */
   .newUnit{
-    filter: hue-rotate(145deg) saturate(2.15) brightness(1.18) drop-shadow(0 0 10px rgba(34,197,94,.85)) !important;
+    /* Keep each place colour unique while still highlighting new units */
+    filter: saturate(1.28) brightness(1.14) drop-shadow(0 0 10px rgba(255,255,255,.58)) drop-shadow(0 0 12px rgba(15,23,42,.20)) !important;
     transform: scale(1.08) !important;
   }
   .takeawayUnit{
@@ -306,6 +308,9 @@
   .ghost{
     position: fixed;
     left: 0; top: 0;
+    /* Prevent a temporary cube/rod from flashing at the top-left corner before its animation starts. */
+    opacity: 0;
+    transform: translate(-9999px, -9999px) scale(.01);
     will-change: transform, opacity, filter;
     pointer-events: none;
   }
@@ -830,9 +835,9 @@
   const SVG_ONE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56.5 64">
   <defs>
     <style>
-      .cls-1 { fill: #f7b12b; }
-      .cls-2 { fill: #c97e00; }
-      .cls-3 { fill: #e48f00; }
+      .cls-1 { fill: #fde047; }
+      .cls-2 { fill: #a16207; }
+      .cls-3 { fill: #facc15; }
       .cls-4 { fill: #fff; }
     </style>
   </defs>
@@ -844,9 +849,9 @@
   const SVG_TEN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 39.18 206">
   <defs>
     <style>
-      .cls-1 { fill: #30a5ff; }
-      .cls-2 { fill: #1f66cc; }
-      .cls-3 { fill: #1b8eea; }
+      .cls-1 { fill: #93c5fd; }
+      .cls-2 { fill: #1d4ed8; }
+      .cls-3 { fill: #2563eb; }
       .cls-4 { fill: #fff; }
     </style>
   </defs>
@@ -876,9 +881,9 @@
     </defs>
 
     <!-- Faces -->
-    <polygon points="4.00,64.00 90.60,114.00 90.60,104.00 4.00,54.00" fill="rgb(24,120,25)"/>
-    <polygon points="177.21,64.00 90.60,114.00 90.60,104.00 177.21,54.00" fill="rgb(34,171,36)"/>
-    <polygon points="90.60,4.00 177.21,54.00 90.60,104.00 4.00,54.00" fill="rgb(138,211,139)"/>
+    <polygon points="4.00,64.00 90.60,114.00 90.60,104.00 4.00,54.00" fill="rgb(157,23,77)"/>
+    <polygon points="177.21,64.00 90.60,114.00 90.60,104.00 177.21,54.00" fill="rgb(236,72,153)"/>
+    <polygon points="90.60,4.00 177.21,54.00 90.60,104.00 4.00,54.00" fill="rgb(249,168,212)"/>
 
     <!-- Grid lines (clipped to each face) -->
     <path d="M 4.00 64.00 L 4.00 54.00 M 12.66 69.00 L 12.66 59.00 M 21.32 74.00 L 21.32 64.00 M 29.98 79.00 L 29.98 69.00 M 38.64 84.00 L 38.64 74.00 M 47.30 89.00 L 47.30 79.00 M 55.96 94.00 L 55.96 84.00 M 64.62 99.00 L 64.62 89.00 M 73.28 104.00 L 73.28 94.00 M 81.94 109.00 L 81.94 99.00 M 90.60 114.00 L 90.60 104.00 M 4.00 64.00 L 90.60 114.00 M 4.00 54.00 L 90.60 104.00" clip-path="url(#hundred-clip-left)" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>
@@ -900,9 +905,9 @@
     </defs>
 
     <!-- Faces -->
-    <polygon points="4.00,124.00 73.28,164.00 73.28,84.00 4.00,44.00" fill="rgb(76,41,134)"/>
-    <polygon points="142.56,124.00 73.28,164.00 73.28,84.00 142.56,44.00" fill="rgb(109,59,191)"/>
-    <polygon points="73.28,4.00 142.56,44.00 73.28,84.00 4.00,44.00" fill="rgb(153,118,210)"/>
+    <polygon points="4.00,124.00 73.28,164.00 73.28,84.00 4.00,44.00" fill="rgb(91,33,182)"/>
+    <polygon points="142.56,124.00 73.28,164.00 73.28,84.00 142.56,44.00" fill="rgb(139,92,246)"/>
+    <polygon points="73.28,4.00 142.56,44.00 73.28,84.00 4.00,44.00" fill="rgb(196,181,253)"/>
 
     <!-- Grid lines (clipped to each face) -->
     <path d="M 4.00 124.00 L 4.00 44.00 M 10.93 128.00 L 10.93 48.00 M 17.86 132.00 L 17.86 52.00 M 24.78 136.00 L 24.78 56.00 M 31.71 140.00 L 31.71 60.00 M 38.64 144.00 L 38.64 64.00 M 45.57 148.00 L 45.57 68.00 M 52.50 152.00 L 52.50 72.00 M 59.43 156.00 L 59.43 76.00 M 66.35 160.00 L 66.35 80.00 M 73.28 164.00 L 73.28 84.00 M 4.00 124.00 L 73.28 164.00 M 4.00 116.00 L 73.28 156.00 M 4.00 108.00 L 73.28 148.00 M 4.00 100.00 L 73.28 140.00 M 4.00 92.00 L 73.28 132.00 M 4.00 84.00 L 73.28 124.00 M 4.00 76.00 L 73.28 116.00 M 4.00 68.00 L 73.28 108.00 M 4.00 60.00 L 73.28 100.00 M 4.00 52.00 L 73.28 92.00 M 4.00 44.00 L 73.28 84.00" clip-path="url(#thousand-clip-left)" fill="none" stroke="#ffffff" stroke-width="1.0" stroke-linecap="round"/>
@@ -946,6 +951,26 @@
     return "";
   }
 
+
+  function applyBlockFaceColors(blk, placeKey){
+    if (!blk) return;
+    const svg = blk.querySelector("svg");
+    if (!svg) return;
+
+    const palette = {
+      o:  ["#fde047", "#a16207", "#facc15"], // ones: yellow
+      t:  ["#93c5fd", "#1d4ed8", "#2563eb"], // tens: blue
+      h:  ["#f9a8d4", "#9d174d", "#ec4899"], // hundreds: pink
+      th: ["#c4b5fd", "#5b21b6", "#8b5cf6"]  // thousands: purple
+    }[placeKey];
+
+    if (!palette) return;
+    // Use inline style so it overrides the SVG class fill rules from the embedded artwork.
+    svg.querySelectorAll('.cls-1').forEach(el => { el.style.fill = palette[0]; el.setAttribute('fill', palette[0]); });
+    svg.querySelectorAll('.cls-2').forEach(el => { el.style.fill = palette[1]; el.setAttribute('fill', palette[1]); });
+    svg.querySelectorAll('.cls-3').forEach(el => { el.style.fill = palette[2]; el.setAttribute('fill', palette[2]); });
+  }
+
   // discs color helpers
   function hexToRgb(hex){
     const m = hex.trim().match(/^#?([0-9a-f]{6})$/i);
@@ -965,10 +990,10 @@
   function lighten(hex, amt){ return mix(hex, "#ffffff", amt); }
 
   function discBaseColor(placeKey){
-    if (placeKey === "o")  return "#11a7e6";
-    if (placeKey === "t")  return "#f4a11c";
-    if (placeKey === "h")  return "#f58ab4";
-    if (placeKey === "th") return "#32b44a";
+    if (placeKey === "o")  return "#eab308"; // ones: yellow
+    if (placeKey === "t")  return "#2563eb"; // tens: bright blue
+    if (placeKey === "h")  return "#ec4899"; // hundreds: pink
+    if (placeKey === "th") return "#8b5cf6"; // thousands: purple
     if (placeKey === "tt") return "#ef4444";
     if (placeKey === "ht") return "#2563eb";
     if (placeKey === "m")  return "#7c3aed";
@@ -1069,6 +1094,7 @@
   let currentN = 0;
   let isAnimating = false;
   let pendingIncoming = null;
+  let forceVisiblePlaceKeys = null;
 
   function clampInt(n, min, max){
     n = parseInt(n,10);
@@ -1176,6 +1202,13 @@
     return { tm:7, m:6, ht:5, tt:4, th:3, h:2, t:1, o:0 }[placeKey] ?? 0;
   }
   function placeFill(placeKey){
+    if (placeKey === "t") {
+      const base = "#93c5fd";
+      const rim  = "#60a5fa";
+      const top  = "#dbeafe";
+      const bot  = "#7dd3fc";
+      return { bg: `linear-gradient(180deg, ${top} 0%, ${base} 60%, ${bot} 100%)`, border: rim };
+    }
     const base = discBaseColor(placeKey);
     const rim  = darken(base, 0.18);
     const top  = lighten(base, 0.14);
@@ -1360,6 +1393,7 @@
       const blk = document.createElement("div");
       blk.className = `blk ${blockClass(placeKey)}`;
       blk.innerHTML = blockSVG(placeKey);
+      applyBlockFaceColors(blk, placeKey);
       ghost.appendChild(blk);
     } else {
       // disc token
@@ -1393,6 +1427,74 @@
     const stage = stageForPlace(placeKey);
     if (!stage) return [];
     return Array.from(stage.querySelectorAll(".blk, .disc"));
+  }
+
+  function takeOneVisibleItemInPlace(placeKey){
+    const items = visibleItemsInPlace(placeKey).filter(el => !el.classList.contains("vanish"));
+    const el = items[items.length - 1];
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    el.classList.add("vanish");
+    return { el, x:r.left + r.width/2, y:r.top + r.height/2 };
+  }
+
+  function ghostCenter(g, fallback){
+    if (!g) return fallback;
+    const r = g.getBoundingClientRect();
+    if (r.width || r.height) return { x:r.left + r.width/2, y:r.top + r.height/2 };
+    return fallback;
+  }
+
+  function ensureBank(bank, placeKey){
+    if (!bank[placeKey]) bank[placeKey] = [];
+    return bank[placeKey];
+  }
+
+
+  function tokenSizeFor(placeKey, mode){
+    const s = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--S")) || 13;
+    const blocksOk = (mode === "blocks") && ["th","h","t","o"].includes(placeKey);
+    if (blocksOk){
+      if (placeKey === "o")  return { w:s*3.2,  h:s*3.6,  cols:5 };
+      if (placeKey === "t")  return { w:s*2.4,  h:s*12.0, cols:5 };
+      if (placeKey === "h")  return { w:s*10.0, h:s*6.5,  cols:2 };
+      if (placeKey === "th") return { w:s*7.8,  h:s*9.0,  cols:3 };
+    }
+    return { w:s*3.6, h:s*3.6, cols:5 };
+  }
+
+  function neatSplitPositions(placeKey, mode, panelRect, count){
+    const tc = rectCenter(panelRect);
+    const size = tokenSizeFor(placeKey, mode);
+    let cols = Math.min(size.cols, count);
+
+    // For tall rods, reduce columns when the target panel is narrow.
+    if (placeKey === "t" && panelRect.width < size.w * 5.6) cols = 4;
+
+    const rows = Math.ceil(count / cols);
+    const gap = Math.max(6, Math.min(size.w, size.h) * 0.25);
+    const fullW = cols * size.w + (cols - 1) * gap;
+    const fullH = rows * size.h + (rows - 1) * gap;
+    const scale = Math.min(1, (panelRect.width * 0.78) / fullW, (panelRect.height * 0.72) / fullH);
+    const stepX = (size.w + gap) * scale;
+    const stepY = (size.h + gap) * scale;
+    const totalH = rows * size.h * scale + (rows - 1) * gap * scale;
+    const top = tc.y - totalH / 2;
+
+    const positions = [];
+    for (let i = 0; i < count; i++){
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+      const rowCount = (row === rows - 1) ? (count - row * cols) : cols;
+      const rowW = rowCount * size.w * scale + (rowCount - 1) * gap * scale;
+      const left = tc.x - rowW / 2;
+      positions.push({
+        x: left + col * stepX + (size.w * scale) / 2,
+        y: top + row * stepY + (size.h * scale) / 2,
+        s: scale
+      });
+    }
+    return positions;
   }
 
   function addCross(el){
@@ -1473,7 +1575,7 @@
         g.animate([
           { transform:`translate(${x}px, ${y}px) scale(0.20)`, opacity:0.0 },
           { transform:`translate(${x}px, ${y}px) scale(0.88)`, opacity:1.0 }
-        ], { duration: 520, easing:"cubic-bezier(.2,.9,.2,1)", fill:"forwards" });
+        ], { duration: 520, easing:"cubic-bezier(.2,.9,.2,1)", fill:"both" });
 
         ghosts.push(g);
       }
@@ -1491,68 +1593,360 @@
     ghosts.forEach(g => g.remove());
   }
 
-  async function animateSubtractedUnits(delta, modeNow){
+  async function animateSubtractedUnits(delta, modeNow, borrowBank = {}){
     const unitMap = makeUnitMapFromDelta(delta);
     const animated = [];
+    const borrowedTargets = [];
     const ghosts = [];
 
     for (const [placeKey, count] of Object.entries(unitMap)){
       const stage = stageForPlace(placeKey);
       if (!stage) continue;
+
+      let remaining = count;
+
+      // ✅ If borrowing has just split a ten/hundred/thousand, subtract from those
+      // newly arrived lower-place units first. This makes 30 − 1 show:
+      // 2 tens stay, 1 ten splits into 10 ones, then 1 one is crossed out.
+      const bank = ensureBank(borrowBank, placeKey);
+      while (remaining > 0 && bank.length){
+        const tok = bank.pop();
+        const body = tokenBody(tok.el);
+        if (body) addCross(body);
+        borrowedTargets.push(tok);
+        remaining--;
+      }
+
       const items = visibleItemsInPlace(placeKey).filter(el => !el.classList.contains("vanish"));
-      const actual = items.slice(Math.max(0, items.length - count));
+      const actual = items.slice(Math.max(0, items.length - remaining));
 
       actual.forEach(el => {
         addCross(el);
         animated.push(el);
       });
+      remaining -= actual.length;
 
-      const missing = Math.max(0, count - actual.length);
-      if (missing){
+      if (remaining > 0){
         const r = stage.getBoundingClientRect();
         const c = rectCenter(r);
         const spread = Math.min(r.width, r.height) * 0.16;
 
-        for (let i=0; i<missing; i++){
+        for (let i=0; i<remaining; i++){
           const g = makeToken(placeKey, modeNow);
           const body = tokenBody(g);
           addCross(body);
           animLayer.appendChild(g);
 
-          const a = (Math.PI * 2) * (i / Math.max(1, missing));
+          const a = (Math.PI * 2) * (i / Math.max(1, remaining));
           const x = c.x + Math.cos(a) * spread;
           const y = c.y + Math.sin(a) * spread;
 
           g.animate([
             { transform:`translate(${x}px, ${y}px) scale(0.20)`, opacity:0.0 },
             { transform:`translate(${x}px, ${y}px) scale(0.86)`, opacity:1.0 }
-          ], { duration: 420, easing:"cubic-bezier(.2,.9,.2,1)", fill:"forwards" });
+          ], { duration: 520, easing:"cubic-bezier(.2,.9,.2,1)", fill:"both" });
           ghosts.push({ el:g, x, y });
         }
       }
     }
 
-    if (!animated.length && !ghosts.length) return;
+    if (!animated.length && !borrowedTargets.length && !ghosts.length) return;
     resumeAudioIfNeeded();
     playClick();
-    await wait(620);
+
+    // keep the cross visible long enough for pupils to see the subtraction
+    await wait(820);
 
     animated.forEach(el => el.classList.add("takeawayUnit"));
+
+    borrowedTargets.forEach(tok => {
+      const c = ghostCenter(tok.el, {x:tok.x, y:tok.y});
+      tok.el.animate([
+        { transform:`translate(${c.x}px, ${c.y}px) scale(0.62)`, opacity:1.0, filter:"blur(0px)" },
+        { transform:`translate(${c.x}px, ${c.y}px) scale(0.24) rotate(-6deg)`, opacity:0.0, filter:"blur(.7px)" }
+      ], { duration: 920, easing:"ease-in-out", fill:"both" });
+    });
+
     ghosts.forEach(({el, x, y}) => {
       el.animate([
         { transform:`translate(${x}px, ${y}px) scale(0.86)`, opacity:1.0, filter:"blur(0px)" },
         { transform:`translate(${x}px, ${y}px) scale(0.26) rotate(-6deg)`, opacity:0.0, filter:"blur(.7px)" }
-      ], { duration: 820, easing:"ease-in-out", fill:"forwards" });
+      ], { duration: 920, easing:"ease-in-out", fill:"both" });
     });
 
-    await wait(880);
+    await wait(980);
+    borrowedTargets.forEach(t => t.el.remove());
     ghosts.forEach(g => g.el.remove());
   }
 
 
   function wait(ms){ return new Promise(res => setTimeout(res, ms)); }
 
+  function connectedTenPositions(center, panelRect){
+    const size = tokenSizeFor("o", "blocks");
+
+    // Build a ten-stick from 10 ones. The overlap makes the cubes look
+    // connected, like toy blocks snapping together.
+    let scale = Math.min(0.42, (panelRect.height * 0.76) / (size.h * 10 * 0.72));
+    scale = Math.max(0.24, scale);
+
+    const stepY = size.h * scale * 0.72;
+    const startY = center.y - stepY * 4.5;
+    const x = center.x - (size.w * scale * 0.18);
+
+    return Array.from({length:10}, (_, i) => ({
+      x,
+      y: startY + i * stepY,
+      s: scale
+    }));
+  }
+
+  async function animateOnesToTenCarry(toKey, modeNow){
+    const fromPanel = panelGrid.querySelector(`.pvPanel[data-place="o"] .pvStage`);
+    const toPanel   = panelGrid.querySelector(`.pvPanel[data-place="${toKey}"] .pvStage`);
+    if (!fromPanel || !toPanel) return false;
+
+    const fr = fromPanel.getBoundingClientRect();
+    const tr = toPanel.getBoundingClientRect();
+    const fc = rectCenter(fr);
+    const tc = rectCenter(tr);
+
+    // Start as 10 separate ones in the ones column.
+    const startPositions = neatSplitPositions("o", modeNow, fr, 10);
+    const rodPositions = connectedTenPositions(fc, fr);
+    const tokens = [];
+
+    vanishInStage("o");
+    resumeAudioIfNeeded();
+    playClick();
+
+    for (let i=0;i<10;i++){
+      const g = makeToken("o", modeNow);
+      animLayer.appendChild(g);
+      const start = startPositions[i] || {x:fc.x, y:fc.y, s:0.7};
+      const end = rodPositions[i];
+      const body = tokenBody(g);
+      if (body) body.style.filter = "drop-shadow(0 6px 10px rgba(0,0,0,.18))";
+
+      g.animate([
+        { transform:`translate(${start.x}px, ${start.y}px) scale(${Math.min(0.72, 0.72 * start.s)})`, opacity:0.0 },
+        { transform:`translate(${start.x}px, ${start.y}px) scale(${Math.min(0.72, 0.72 * start.s)})`, opacity:1.0, offset:0.14 },
+        { transform:`translate(${end.x}px, ${end.y}px) scale(${end.s})`, opacity:1.0 }
+      ], {
+        duration: 1450,
+        delay: i * 85,
+        easing:"cubic-bezier(.2,.8,.2,1)",
+        fill:"both"
+      });
+
+      tokens.push({el:g, end});
+    }
+
+    // Let pupils see the ten individual ones slowly snap into one neat stick.
+    await wait(1450 + 9 * 85 + 280);
+
+    resumeAudioIfNeeded();
+    playClick();
+
+    const carrier = makeToken(toKey, modeNow);
+    const carrierBody = tokenBody(carrier);
+    if (carrierBody) carrierBody.classList.add("newUnit");
+    animLayer.appendChild(carrier);
+
+    // Replace the connected cubes with the proper ten rod, then move it.
+    tokens.forEach(({el, end}) => {
+      el.animate([
+        { transform:`translate(${end.x}px, ${end.y}px) scale(${end.s})`, opacity:1.0 },
+        { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.18)`, opacity:0.0 }
+      ], { duration: 620, easing:"ease-in-out", fill:"both" });
+    });
+
+    const form = carrier.animate([
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.22)`, opacity:0.0 },
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.78)`, opacity:1.0 }
+    ], { duration: 700, easing:"cubic-bezier(.2,.9,.2,1)", fill:"both" });
+    try { await form.finished; } catch(_){}
+
+    await wait(220);
+    if (carrierBody) carrierBody.classList.remove("newUnit");
+
+    resumeAudioIfNeeded();
+    playSwoosh();
+    const mv = carrier.animate([
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.78)`, opacity:1.0, filter:"blur(0px)" },
+      { transform:`translate(${tc.x}px, ${tc.y}px) scale(0.82)`, opacity:1.0, filter:"blur(0px)" }
+    ], { duration: 1350, easing:"cubic-bezier(.2,.8,.2,1)", fill:"both" });
+    try { await mv.finished; } catch(_){}
+
+    tokens.forEach(t => t.el.remove());
+    carrier.remove();
+    return true;
+  }
+
+
+  function connectedTenRodsToHundredPositions(center, panelRect){
+    const size = tokenSizeFor("t", "blocks");
+
+    // Ten tens join side-by-side to show one hundred flat being built.
+    let scale = Math.min(
+      0.58,
+      (panelRect.width * 0.82) / (size.w * 10 * 0.82),
+      (panelRect.height * 0.68) / size.h
+    );
+    scale = Math.max(0.24, scale);
+
+    const stepX = size.w * scale * 0.82;
+    const startX = center.x - stepX * 4.5;
+    const y = center.y;
+
+    return Array.from({length:10}, (_, i) => ({
+      x: startX + i * stepX,
+      y,
+      s: scale
+    }));
+  }
+
+  function connectedHundredFlatsToThousandPositions(center, panelRect){
+    const size = tokenSizeFor("h", "blocks");
+
+    // Ten hundreds join in a compact 2-by-5 stack before becoming one thousand.
+    const cols = 2;
+    const rows = 5;
+    let scale = Math.min(
+      0.34,
+      (panelRect.width * 0.72) / (size.w * 1.55),
+      (panelRect.height * 0.72) / (size.h * 3.45)
+    );
+    scale = Math.max(0.16, scale);
+
+    const stepX = size.w * scale * 0.55;
+    const stepY = size.h * scale * 0.58;
+    const startX = center.x - stepX / 2;
+    const startY = center.y - stepY * 2;
+
+    return Array.from({length:10}, (_, i) => {
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+      // Slight diagonal offset gives a simple 3D stacked-block feeling.
+      const diagonal = row * size.w * scale * 0.035;
+      return {
+        x: startX + col * stepX + diagonal,
+        y: startY + row * stepY,
+        s: scale
+      };
+    });
+  }
+
+  function connectedPositionsForCarry(fromKey, center, panelRect){
+    if (fromKey === "t") return connectedTenRodsToHundredPositions(center, panelRect);
+    if (fromKey === "h") return connectedHundredFlatsToThousandPositions(center, panelRect);
+    return neatSplitPositions(fromKey, "blocks", panelRect, 10);
+  }
+
+  function carrierScaleForCarry(toKey){
+    if (toKey === "h") return { form:0.56, move:0.62 };
+    if (toKey === "th") return { form:0.54, move:0.60 };
+    return { form:0.70, move:0.75 };
+  }
+
+  async function animateConnectedHigherCarry(fromKey, toKey, modeNow){
+    if (modeNow !== "blocks" || !["t","h"].includes(fromKey)) return false;
+
+    const fromPanel = panelGrid.querySelector(`.pvPanel[data-place="${fromKey}"] .pvStage`);
+    const toPanel   = panelGrid.querySelector(`.pvPanel[data-place="${toKey}"] .pvStage`);
+    if (!fromPanel || !toPanel) return false;
+
+    const fr = fromPanel.getBoundingClientRect();
+    const tr = toPanel.getBoundingClientRect();
+    const fc = rectCenter(fr);
+    const tc = rectCenter(tr);
+
+    const startPositions = neatSplitPositions(fromKey, modeNow, fr, 10);
+    const connectedPositions = connectedPositionsForCarry(fromKey, fc, fr);
+    const tokens = [];
+
+    vanishInStage(fromKey);
+    resumeAudioIfNeeded();
+    playClick();
+
+    for (let i=0; i<10; i++){
+      const g = makeToken(fromKey, modeNow);
+      animLayer.appendChild(g);
+      const start = startPositions[i] || {x:fc.x, y:fc.y, s:0.45};
+      const end = connectedPositions[i] || {x:fc.x, y:fc.y, s:0.35};
+      const body = tokenBody(g);
+      if (body) body.style.filter = "drop-shadow(0 7px 12px rgba(0,0,0,.18))";
+
+      g.animate([
+        { transform:`translate(${start.x}px, ${start.y}px) scale(${Math.min(0.70, 0.70 * start.s)})`, opacity:0.0 },
+        { transform:`translate(${start.x}px, ${start.y}px) scale(${Math.min(0.70, 0.70 * start.s)})`, opacity:1.0, offset:0.12 },
+        { transform:`translate(${end.x}px, ${end.y}px) scale(${end.s})`, opacity:1.0 }
+      ], {
+        duration: 1600,
+        delay: i * 90,
+        easing:"cubic-bezier(.2,.8,.2,1)",
+        fill:"both"
+      });
+
+      tokens.push({ el:g, end });
+    }
+
+    // Pause so pupils can see the ten lower-place blocks connected neatly.
+    await wait(1600 + 9 * 90 + 360);
+
+    resumeAudioIfNeeded();
+    playClick();
+
+    const scale = carrierScaleForCarry(toKey);
+    const carrier = makeToken(toKey, modeNow);
+    const carrierBody = tokenBody(carrier);
+    if (carrierBody) carrierBody.classList.add("newUnit");
+    animLayer.appendChild(carrier);
+
+    tokens.forEach(({el, end}) => {
+      el.animate([
+        { transform:`translate(${end.x}px, ${end.y}px) scale(${end.s})`, opacity:1.0 },
+        { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.14)`, opacity:0.0 }
+      ], { duration: 680, easing:"ease-in-out", fill:"both" });
+    });
+
+    const form = carrier.animate([
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.18)`, opacity:0.0 },
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(${scale.form})`, opacity:1.0 }
+    ], { duration: 760, easing:"cubic-bezier(.2,.9,.2,1)", fill:"both" });
+    try { await form.finished; } catch(_){}
+
+    await wait(260);
+    if (carrierBody) carrierBody.classList.remove("newUnit");
+
+    resumeAudioIfNeeded();
+    playSwoosh();
+    const mv = carrier.animate([
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(${scale.form})`, opacity:1.0, filter:"blur(0px)" },
+      { transform:`translate(${tc.x}px, ${tc.y}px) scale(${scale.move})`, opacity:1.0, filter:"blur(0px)" }
+    ], { duration: 1450, easing:"cubic-bezier(.2,.8,.2,1)", fill:"both" });
+    try { await mv.finished; } catch(_){}
+
+    tokens.forEach(t => t.el.remove());
+    carrier.remove();
+    return true;
+  }
+
   async function animateCarry(fromKey, toKey, modeNow){
+    // ✅ Addition regrouping for 10 ones: show the cubes connecting slowly
+    // into one ten, then move the completed ten into the tens column.
+    if (fromKey === "o" && toKey === "t" && modeNow === "blocks"){
+      const done = await animateOnesToTenCarry(toKey, modeNow);
+      if (done) return;
+    }
+
+    // ✅ Addition regrouping for higher places:
+    // 10 tens connect to become 1 hundred; 10 hundreds connect to become 1 thousand.
+    if ((fromKey === "t" || fromKey === "h") && modeNow === "blocks"){
+      const done = await animateConnectedHigherCarry(fromKey, toKey, modeNow);
+      if (done) return;
+    }
+
     const fromPanel = panelGrid.querySelector(`.pvPanel[data-place="${fromKey}"] .pvStage`);
     const toPanel   = panelGrid.querySelector(`.pvPanel[data-place="${toKey}"] .pvStage`);
     if (!fromPanel || !toPanel) return;
@@ -1586,7 +1980,7 @@
         { transform:`translate(${start.x}px, ${start.y}px) scale(${start.s})`, opacity: 0.0, filter:"blur(0px)" },
         { transform:`translate(${start.x}px, ${start.y}px) scale(${start.s})`, opacity: 1.0, filter:"blur(0px)" , offset: 0.15},
         { transform:`translate(${end.x}px, ${end.y}px) scale(${end.s})`, opacity: 1.0, filter:"blur(0px)" }
-      ], { duration: 760, easing:"cubic-bezier(.2,.9,.2,1)", fill:"forwards" });
+      ], { duration: 760, easing:"cubic-bezier(.2,.9,.2,1)", fill:"both" });
 
       tokens.push(g);
     }
@@ -1600,7 +1994,7 @@
           { opacity: 1, transform: `translate(${fc.x}px, ${fc.y}px) scale(0.48)` },
           { opacity: 0, transform: `translate(${fc.x}px, ${fc.y}px) scale(0.18)` }
         ],
-        { duration: 420, easing: "ease-in", fill: "forwards" }
+        { duration: 420, easing: "ease-in", fill: "both" }
       );
     }
 
@@ -1617,7 +2011,7 @@
       { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.62)`, opacity: 0.0, filter:"blur(0px)" },
       { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.62)`, opacity: 1.0, filter:"blur(0px)", offset: 0.10 },
       { transform:`translate(${tc.x}px, ${tc.y}px) scale(0.75)`, opacity: 1.0, filter:"blur(0px)" }
-    ], { duration: 1050, easing:"cubic-bezier(.2,.8,.2,1)", fill:"forwards" });
+    ], { duration: 1050, easing:"cubic-bezier(.2,.8,.2,1)", fill:"both" });
 
     try { await mv.finished; } catch(_){}
 
@@ -1626,66 +2020,99 @@
     carrier.remove();
   }
 
-  async function animateBorrow(fromKey, toKey, modeNow){
+  async function animateBorrow(fromKey, toKey, modeNow, borrowBank = {}){
     const fromPanel = panelGrid.querySelector(`.pvPanel[data-place="${fromKey}"] .pvStage`);
     const toPanel   = panelGrid.querySelector(`.pvPanel[data-place="${toKey}"] .pvStage`);
     if (!fromPanel || !toPanel) return;
 
     const fr = fromPanel.getBoundingClientRect();
     const tr = toPanel.getBoundingClientRect();
-    const fc = rectCenter(fr);
+    const fallbackFrom = rectCenter(fr);
     const tc = rectCenter(tr);
+    const endPositions = neatSplitPositions(toKey, modeNow, tr, 10);
 
-    // ✅ fade out background items in the source place (clearer ungrouping)
-    vanishInStage(fromKey);
+    // ✅ Borrow precisely ONE higher-place unit only.
+    // Example: 30 − 1 keeps 2 tens visible, moves 1 ten to Ones,
+    // splits it into 10 neatly arranged ones, then crosses out 1 one.
+    const fromBank = ensureBank(borrowBank, fromKey);
+    let source = null;
+    let big = null;
+
+    if (fromBank.length){
+      const tok = fromBank.pop();
+      source = { kind:"borrowed", el:tok.el, ...ghostCenter(tok.el, {x:tok.x, y:tok.y}) };
+      big = tok.el;
+      const body = tokenBody(big);
+      if (body) body.classList.remove("newUnit");
+    } else {
+      const taken = takeOneVisibleItemInPlace(fromKey);
+      source = taken || { kind:"stage", x:fallbackFrom.x, y:fallbackFrom.y };
+      big = makeToken(fromKey, modeNow);
+      animLayer.appendChild(big);
+    }
+
+    const fc = { x:source.x, y:source.y };
 
     resumeAudioIfNeeded();
     playClick();
 
-    // show 1 higher unit (source)
-    const big = makeToken(fromKey, modeNow);
-    animLayer.appendChild(big);
+    // 1) Show the borrowed higher-place unit at its original place.
+    const appear = big.animate([
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.62)`, opacity:0.0 },
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.82)`, opacity:1.0 }
+    ], { duration: 520, easing:"cubic-bezier(.2,.9,.2,1)", fill:"both" });
+    try { await appear.finished; } catch(_){}
 
-    const pop = big.animate([
-      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.40)`, opacity:0.0 },
-      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.78)`, opacity:1.0, offset:0.35 },
-      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.70)`, opacity:1.0 }
-    ], { duration: 620, easing:"cubic-bezier(.2,.9,.2,1)", fill:"forwards" });
-
-    try { await pop.finished; } catch(_){}
-
-    // split into 10 lower units flying to lower place
+    // 2) Move that one ten/hundred/thousand into the lower place first.
     resumeAudioIfNeeded();
     playSwoosh();
+    const move = big.animate([
+      { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.82)`, opacity:1.0 },
+      { transform:`translate(${tc.x}px, ${tc.y}px) scale(0.82)`, opacity:1.0 }
+    ], { duration: 1250, easing:"cubic-bezier(.2,.8,.2,1)", fill:"both" });
+    try { await move.finished; } catch(_){}
+    await wait(180);
+
+    // 3) Split it into exactly 10 lower-place units, arranged neatly.
+    resumeAudioIfNeeded();
+    playClick();
 
     const tokens = [];
-    const spread = Math.min(tr.width, tr.height) * 0.22;
 
-    // fade out the big one as it splits
-    big.animate([{opacity:1},{opacity:0, transform:`translate(${fc.x}px, ${fc.y}px) scale(0.2)`}], {duration:360, easing:"ease-in", fill:"forwards"});
+    big.animate([
+      { opacity:1, transform:`translate(${tc.x}px, ${tc.y}px) scale(0.82)` },
+      { opacity:0, transform:`translate(${tc.x}px, ${tc.y}px) scale(0.24)` }
+    ], {duration:600, easing:"ease-in", fill:"both"});
 
     for (let i=0;i<10;i++){
       const g = makeToken(toKey, modeNow);
+      const body = tokenBody(g);
+      if (body) body.classList.add("newUnit");
       animLayer.appendChild(g);
 
-      const a = (Math.PI*2) * (i/10);
-      const ex = tc.x + Math.cos(a) * spread + (Math.random()*10-5);
-      const ey = tc.y + Math.sin(a) * spread + (Math.random()*10-5);
-
+      const pos = endPositions[i];
       const an = g.animate([
-        { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.38)`, opacity:0.0 },
-        { transform:`translate(${fc.x}px, ${fc.y}px) scale(0.60)`, opacity:1.0, offset:0.12 },
-        { transform:`translate(${ex}px, ${ey}px) scale(0.62)`, opacity:1.0 }
-      ], { duration: 1050, easing:"cubic-bezier(.2,.8,.2,1)", fill:"forwards" });
+        { transform:`translate(${tc.x}px, ${tc.y}px) scale(0.18)`, opacity:0.0 },
+        { transform:`translate(${tc.x}px, ${tc.y}px) scale(0.52)`, opacity:1.0, offset:0.16 },
+        { transform:`translate(${pos.x}px, ${pos.y}px) scale(${0.70 * pos.s})`, opacity:1.0 }
+      ], { duration: 1250, easing:"cubic-bezier(.2,.8,.2,1)", fill:"both" });
 
-      tokens.push({el:g, anim:an});
+      tokens.push({el:g, anim:an, x:pos.x, y:pos.y, s:0.70 * pos.s, placeKey:toKey});
     }
 
-    await wait(1100);
+    await wait(1320);
 
-    tokens.forEach(t => t.el.remove());
+    // Newly created units start in a different colour, then become normal.
+    tokens.forEach(t => {
+      const body = tokenBody(t.el);
+      if (body) body.classList.remove("newUnit");
+    });
+    await wait(360);
+
+    ensureBank(borrowBank, toKey).push(...tokens.map(t => ({ el:t.el, x:t.x, y:t.y, s:t.s, placeKey:toKey })));
     big.remove();
   }
+
 
   function computeCarryEvents(oldN, delta){
     const smallToBig = [...PLACES].slice().reverse(); // ones -> ... -> tm
@@ -1753,6 +2180,14 @@
     let applied = false;
     try{
       if (isAdd){
+        if (hadRegroup){
+          // Make newly created target columns visible before the animation.
+          // Example: 9 + 1 needs the Tens column to exist before the ten rod moves there.
+          forceVisiblePlaceKeys = Array.from(new Set(ev.flatMap(e => [e.from, e.to])));
+          numInput.value = oldN;
+          render();
+        }
+
         // If a regroup will happen, first show the newly added unit(s) in a different colour.
         if (hadRegroup) await animateAddedUnits(actualDelta, modeNow);
 
@@ -1761,21 +2196,25 @@
         }
 
         pendingIncoming = makeIncomingMap(oldN, nextN, actualDelta, hadRegroup);
+        forceVisiblePlaceKeys = null;
         numInput.value = nextN;
         render();
         applied = true;
       } else {
-        // First ungroup slowly, then cross out the unit(s) being subtracted.
+        // First ungroup slowly into a visual intermediate state, then cross out
+        // the exact lower-place unit(s) being subtracted.
+        const borrowBank = {};
         for (const e of ev){
-          await animateBorrow(e.from, e.to, modeNow);
+          await animateBorrow(e.from, e.to, modeNow, borrowBank);
         }
 
-        await animateSubtractedUnits(actualDelta, modeNow);
+        await animateSubtractedUnits(actualDelta, modeNow, borrowBank);
         numInput.value = nextN;
         render();
         applied = true;
       }
     } finally {
+      forceVisiblePlaceKeys = null;
       animLayer.innerHTML = "";
       document.body.classList.remove("animating");
       isAnimating = false;
@@ -1806,7 +2245,13 @@
     numInput.step = String(step);
 
     const digs = digitsFor(n);
-    const act = activePlaces(digs);
+    let act = activePlaces(digs);
+    if (forceVisiblePlaceKeys && forceVisiblePlaceKeys.length){
+      const firstNormal = PLACES.findIndex(p => act.some(a => a.key === p.key));
+      const firstForced = Math.min(...forceVisiblePlaceKeys.map(k => placeIndex[k]).filter(i => Number.isFinite(i)));
+      const first = Math.min(firstNormal < 0 ? PLACES.length - 1 : firstNormal, firstForced);
+      act = PLACES.slice(first);
+    }
     const mode = effectiveMode(n);
 
     document.documentElement.style.setProperty("--cols", Math.min(act.length, 8));
@@ -1856,6 +2301,7 @@
           const blk = document.createElement("div");
           blk.className = `blk ${blockClass(place.key)}`;
           blk.innerHTML = blockSVG(place.key);
+          applyBlockFaceColors(blk, place.key);
           pile.appendChild(blk);
         }
         box.appendChild(pile);
