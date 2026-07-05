@@ -166,7 +166,7 @@
   }
   .pile.rods{
     display:grid;
-    grid-template-columns: repeat(4, max-content);
+    grid-template-columns: repeat(5, max-content);
     gap: calc(var(--S) * 0.45);
     justify-content:center;
     align-items:end;
@@ -181,16 +181,20 @@
   .pile.flats{
     display:grid;
     grid-template-columns: repeat(2, max-content);
+    grid-template-rows: repeat(5, max-content);
+    grid-auto-flow: column;
     gap: calc(var(--S) * 0.55);
     justify-content:center;
-    align-items:end;
+    align-items:center;
   }
   .pile.cubes{
     display:grid;
-    grid-template-columns: repeat(3, max-content);
+    grid-template-columns: repeat(2, max-content);
+    grid-template-rows: repeat(5, max-content);
+    grid-auto-flow: column;
     gap: calc(var(--S) * 0.55);
     justify-content:center;
-    align-items:end;
+    align-items:center;
   }
 
   /* blocks */
@@ -205,10 +209,11 @@
 
   /* discs */
   .discStack{
-    display:flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    display:grid;
+    grid-template-columns: repeat(5, max-content);
+    grid-auto-rows: max-content;
     justify-content:center;
+    align-content:center;
     align-items:center;
     gap: calc(var(--S) * 0.55);
     padding: 4px 0;
@@ -660,11 +665,132 @@
     text-align:center;
   }
 
+  .celebrationLayer{
+    position: fixed;
+    inset: 0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index: 90;
+  }
+  .confettiPiece{
+    position: fixed;
+    width: 10px;
+    height: 16px;
+    border-radius: 3px;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
   .credit{
     font-size: 12px;
     color: var(--muted);
     text-align:right;
     padding-top: 2px;
+  }
+
+
+
+  /* ✅ more/less question mode */
+  .questionBar{
+    /* Floating overlay: showing a question must not push, hide or resize the main display. */
+    position: fixed;
+    top: 74px;
+    left: 14px;
+    right: calc(14px + var(--sidePad));
+    max-width: 1300px;
+    margin: 0 auto;
+    z-index: 12;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    box-shadow: 0 18px 34px rgba(0,0,0,.18);
+    padding: 10px 12px;
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+  }
+  .questionBar.show{ display:flex; }
+  .questionLabel{
+    font-size: 12px;
+    font-weight: 1000;
+    color: var(--muted);
+    letter-spacing: .3px;
+    text-transform: uppercase;
+  }
+  .questionText{
+    margin-top: 2px;
+    font-size: clamp(20px, 3vw, 34px);
+    font-weight: 1000;
+    color:#000;
+    line-height:1.1;
+  }
+  .answerBlank{
+    display:inline-flex;
+    min-width: 5.2em;
+    min-height: 1.12em;
+    padding: 0 10px 2px;
+    align-items:flex-end;
+    justify-content:center;
+    border-bottom: 5px solid #0f172a;
+    border-radius: 6px 6px 0 0;
+    color: transparent;
+    vertical-align: baseline;
+    transform: translateY(2px);
+  }
+  .answerBlank::after{
+    content:"";
+  }
+  .answerBlank.filled{
+    color:#059669;
+    background:#ecfdf5;
+    border-bottom-color:#059669;
+    box-shadow: inset 0 -10px 0 rgba(16,185,129,.12), 0 0 0 3px rgba(16,185,129,.10);
+    animation: answerPop .55s cubic-bezier(.2,.9,.2,1);
+  }
+  @keyframes answerPop{
+    0%{ transform: translateY(2px) scale(.86); }
+    70%{ transform: translateY(2px) scale(1.08); }
+    100%{ transform: translateY(2px) scale(1); }
+  }
+  .questionHint{
+    margin-top: 4px;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--muted);
+  }
+  .questionActions{
+    display:flex;
+    gap: 10px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  select{
+    width:100%;
+    padding: 10px 10px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 900;
+    background:#fff;
+    outline:none;
+  }
+  .qGrid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .questionSettings{ display:none; }
+  .questionSettings.show{ display:block; }
+  .qPreview{
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background:#f8fafc;
+    border: 1px dashed #cbd5e1;
+    font-size: 14px;
+    font-weight: 1000;
+    color:#0f172a;
   }
 
   @media (max-width: 980px){
@@ -679,6 +805,16 @@
     .chartDigits .cell{ font-size: 34px; }
   }
   @media (max-width: 520px){
+    .topbar{ padding: 8px 8px; gap: 6px; }
+    .title{ min-width: 0; flex: 1 1 auto; overflow: hidden; }
+    .title .big{ font-size: 16px; }
+    .title .small{ display:none; }
+    .actions{ gap: 6px; flex: 0 0 auto; }
+    .actions .pill{ display:none; }
+    .iconBtn{ width: 38px; height: 38px; }
+    .questionBar{ top: 66px; align-items:flex-start; flex-direction:column; }
+    .questionActions{ width:100%; justify-content:flex-start; }
+    .qGrid{ grid-template-columns: 1fr; }
     .panelGrid{ grid-template-columns: 1fr; }
     .expLine{ font-size: 24px; }
   }
@@ -703,6 +839,19 @@
   </div>
 
   <div class="wrap">
+
+    <div class="questionBar" id="questionBar" aria-live="polite">
+      <div>
+        <div class="questionLabel">Question</div>
+        <div class="questionText" id="questionText">1 more than 3,241 = <span class="answerBlank" aria-label="blank answer"></span></div>
+        <div class="questionHint" id="questionHint">Enter any number in Settings.</div>
+      </div>
+      <div class="questionActions">
+        <button class="btn" id="btnQuestionAgain" type="button">Show Again</button>
+        <button class="btn primary" id="btnQuestionNext" type="button">Next ▶</button>
+      </div>
+    </div>
+
     <div class="panelGrid" id="panelGrid"></div>
 
     <div class="cardsWrap" id="cardsWrap">
@@ -760,6 +909,18 @@
         </div>
       </div>
 
+      <!-- ✅ Activity mode selector -->
+      <div class="field">
+        <label>Activity Mode</label>
+        <div class="seg" role="tablist" aria-label="Activity mode selector">
+          <button id="btnShowNumberMode" type="button" class="active">Show Number Mode</button>
+          <button id="btnQuestionMode" type="button">More/Less Than Mode</button>
+        </div>
+        <div class="note" id="activityModeNote" style="margin-top:10px;">
+          Show Number Mode displays the keyed-in number with blocks/discs, cards and chart.
+        </div>
+      </div>
+
       <!-- ✅ Increment/Decrement controls -->
       <div class="field">
         <label>Step (increment/decrement)</label>
@@ -767,6 +928,36 @@
         <div class="btnRow" style="margin-top:10px;">
           <button class="btn" id="decStep" type="button">− Step</button>
           <button class="btn" id="incStep" type="button">+ Step</button>
+        </div>
+      </div>
+
+
+      <!-- ✅ More/Less Question Mode -->
+      <div class="field questionSettings" id="questionSettings">
+        <label>Question Settings</label>
+        <div class="qGrid">
+          <select id="questionAmount" aria-label="Question amount">
+            <option value="1">1</option>
+            <option value="10">10</option>
+            <option value="100">100</option>
+            <option value="1000">1,000</option>
+            <option value="10000">10,000</option>
+            <option value="100000">100,000</option>
+            <option value="1000000">1,000,000</option>
+            <option value="10000000">10,000,000</option>
+          </select>
+          <select id="questionDirection" aria-label="More or less">
+            <option value="more">more than</option>
+            <option value="less">less than</option>
+          </select>
+        </div>
+        <div class="qPreview" id="questionPreview">1 more than 3,241 is <span class="answerBlank" aria-label="blank answer"></span></div>
+        <div class="btnRow" style="margin-top:10px;">
+          <button class="btn primary" id="btnShowQuestion" type="button">Show Question</button>
+          <button class="btn" id="btnRevealQuestion" type="button">Next</button>
+        </div>
+        <div class="note" style="margin-top:10px;">
+          More/Less Than Mode uses the <b>Number</b> keyed in above. Choose how much more or less, then press <b>Show Question</b>. Press <b>Next</b> to show the base-ten block/disc movement first, then fill the blank with celebration.
         </div>
       </div>
 
@@ -809,6 +1000,7 @@
 
   <!-- ✅ animation layer for regrouping / ungrouping clarity -->
   <div class="animLayer" id="animLayer"></div>
+  <div class="celebrationLayer" id="celebrationLayer" aria-hidden="true"></div>
 
 <script>
 (() => {
@@ -1071,8 +1263,25 @@
   const incStepBtn = $("incStep");
   const decStepBtn = $("decStep");
 
+  /* ✅ activity/question controls */
+  const btnShowNumberMode = $("btnShowNumberMode");
+  const btnQuestionMode = $("btnQuestionMode");
+  const activityModeNote = $("activityModeNote");
+  const questionSettings = $("questionSettings");
+  const questionBar = $("questionBar");
+  const questionText = $("questionText");
+  const questionHint = $("questionHint");
+  const btnQuestionAgain = $("btnQuestionAgain");
+  const btnQuestionNext = $("btnQuestionNext");
+  const questionAmount = $("questionAmount");
+  const questionDirection = $("questionDirection");
+  const questionPreview = $("questionPreview");
+  const btnShowQuestion = $("btnShowQuestion");
+  const btnRevealQuestion = $("btnRevealQuestion");
+
   /* ✅ regrouping animation layer */
   const animLayer = $("animLayer");
+  const celebrationLayer = $("celebrationLayer");
 
   let chartVisible = true;
   function applyChartVisibility(){
@@ -1096,12 +1305,21 @@
   let cardsView = "apart";
   let preferredMode = "auto";
   let toastTimer = null;
+  let activityMode = "show";
 
   /* ✅ current number tracking for regrouping */
   let currentN = 0;
   let isAnimating = false;
   let pendingIncoming = null;
   let forceVisiblePlaceKeys = null;
+
+  let questionState = {
+    active: false,
+    answered: false,
+    a: 3241,
+    amount: 1,
+    direction: "more"
+  };
 
   function clampInt(n, min, max){
     n = parseInt(n,10);
@@ -1484,8 +1702,8 @@
     if (blocksOk){
       if (placeKey === "o")  return { w:s*3.2,  h:s*3.6,  cols:5 };
       if (placeKey === "t")  return { w:s*2.4,  h:s*12.0, cols:5 };
-      if (placeKey === "h")  return { w:s*10.0, h:s*6.5,  cols:2 };
-      if (placeKey === "th") return { w:s*7.8,  h:s*9.0,  cols:3 };
+      if (placeKey === "h")  return { w:s*10.0, h:s*6.5,  cols:5 };
+      if (placeKey === "th") return { w:s*7.8,  h:s*9.0,  cols:5 };
     }
     return { w:s*3.6, h:s*3.6, cols:5 };
   }
@@ -1493,13 +1711,38 @@
   function neatSplitPositions(placeKey, mode, panelRect, count){
     const tc = rectCenter(panelRect);
     const size = tokenSizeFor(placeKey, mode);
-    let cols = Math.min(size.cols, count);
-
-    // For tall rods, reduce columns when the target panel is narrow.
-    if (placeKey === "t" && panelRect.width < size.w * 5.6) cols = 4;
-
-    const rows = Math.ceil(count / cols);
     const gap = Math.max(6, Math.min(size.w, size.h) * 0.25);
+
+    // Hundreds and thousands are easier to count as 5 on the left column and 5 on the right column.
+    if (mode === "blocks" && (placeKey === "h" || placeKey === "th")) {
+      const cols = Math.min(2, Math.ceil(count / 5));
+      const rows = Math.min(5, count);
+      const fullW = cols * size.w + Math.max(0, cols - 1) * gap;
+      const fullH = rows * size.h + Math.max(0, rows - 1) * gap;
+      const scale = Math.min(1, (panelRect.width * 0.78) / fullW, (panelRect.height * 0.72) / fullH);
+      const stepX = (size.w + gap) * scale;
+      const stepY = (size.h + gap) * scale;
+      const totalW = cols * size.w * scale + Math.max(0, cols - 1) * gap * scale;
+      const totalH = rows * size.h * scale + Math.max(0, rows - 1) * gap * scale;
+      const left = tc.x - totalW / 2;
+      const top = tc.y - totalH / 2;
+
+      const positions = [];
+      for (let i = 0; i < count; i++){
+        const col = Math.floor(i / 5);
+        const row = i % 5;
+        positions.push({
+          x: left + col * stepX + (size.w * scale) / 2,
+          y: top + row * stepY + (size.h * scale) / 2,
+          s: scale
+        });
+      }
+      return positions;
+    }
+
+    // Ones and tens: up to 5 on the top row, then the rest below.
+    const cols = Math.min(5, count);
+    const rows = Math.ceil(count / cols);
     const fullW = cols * size.w + (cols - 1) * gap;
     const fullH = rows * size.h + (rows - 1) * gap;
     const scale = Math.min(1, (panelRect.width * 0.78) / fullW, (panelRect.height * 0.72) / fullH);
@@ -1820,21 +2063,26 @@
   function connectedTenRodsToHundredPositions(center, panelRect){
     const size = tokenSizeFor("t", "blocks");
 
-    // Ten tens join side-by-side to show one hundred flat being built.
+    // Ten tens join in 2 rows of 5 before becoming one hundred.
+    const cols = 5;
+    const rows = 2;
     let scale = Math.min(
-      0.58,
-      (panelRect.width * 0.82) / (size.w * 10 * 0.82),
-      (panelRect.height * 0.68) / size.h
+      0.56,
+      (panelRect.width * 0.80) / (size.w * cols * 0.82),
+      (panelRect.height * 0.76) / (size.h + size.h * 0.58)
     );
-    scale = Math.max(0.24, scale);
+    scale = Math.max(0.22, scale);
 
     const stepX = size.w * scale * 0.82;
-    const startX = center.x - stepX * 4.5;
-    const y = center.y;
+    const stepY = size.h * scale * 0.58;
+    const totalW = stepX * (cols - 1);
+    const totalH = stepY * (rows - 1);
+    const startX = center.x - totalW / 2;
+    const startY = center.y - totalH / 2;
 
     return Array.from({length:10}, (_, i) => ({
-      x: startX + i * stepX,
-      y,
+      x: startX + (i % cols) * stepX,
+      y: startY + Math.floor(i / cols) * stepY,
       s: scale
     }));
   }
@@ -1842,32 +2090,28 @@
   function connectedHundredFlatsToThousandPositions(center, panelRect){
     const size = tokenSizeFor("h", "blocks");
 
-    // Ten hundreds join in a compact 2-by-5 stack before becoming one thousand.
+    // Ten hundreds join as 5 on the left column and 5 on the right column before becoming one thousand.
     const cols = 2;
     const rows = 5;
     let scale = Math.min(
-      0.34,
-      (panelRect.width * 0.72) / (size.w * 1.55),
-      (panelRect.height * 0.72) / (size.h * 3.45)
+      0.26,
+      (panelRect.width * 0.78) / (size.w * (1 + (cols - 1) * 0.55)),
+      (panelRect.height * 0.72) / (size.h * (1 + (rows - 1) * 0.58))
     );
-    scale = Math.max(0.16, scale);
+    scale = Math.max(0.12, scale);
 
     const stepX = size.w * scale * 0.55;
     const stepY = size.h * scale * 0.58;
-    const startX = center.x - stepX / 2;
-    const startY = center.y - stepY * 2;
+    const totalW = stepX * (cols - 1);
+    const totalH = stepY * (rows - 1);
+    const startX = center.x - totalW / 2;
+    const startY = center.y - totalH / 2;
 
-    return Array.from({length:10}, (_, i) => {
-      const row = Math.floor(i / cols);
-      const col = i % cols;
-      // Slight diagonal offset gives a simple 3D stacked-block feeling.
-      const diagonal = row * size.w * scale * 0.035;
-      return {
-        x: startX + col * stepX + diagonal,
-        y: startY + row * stepY,
-        s: scale
-      };
-    });
+    return Array.from({length:10}, (_, i) => ({
+      x: startX + Math.floor(i / 5) * stepX,
+      y: startY + (i % 5) * stepY,
+      s: scale
+    }));
   }
 
   function connectedPositionsForCarry(fromKey, center, panelRect){
@@ -2380,6 +2624,7 @@
 
     /* ✅ keep current number for next step animation */
     currentN = n;
+    updateQuestionBar();
   }
 
   function hideNumberInput(){
@@ -2446,6 +2691,212 @@
     requestAnimationFrame(() => fitAllPanels());
   });
 
+
+
+
+
+  function playClapBurst(delay = 0){
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t0 = ctx.currentTime + delay;
+    const dur = 0.095;
+    const bufferSize = Math.floor(ctx.sampleRate * dur);
+    const buf = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i=0;i<bufferSize;i++){
+      const x = i / bufferSize;
+      const env = Math.exp(-x * 11);
+      data[i] = (Math.random()*2-1) * env;
+    }
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(1350 + Math.random()*450, t0);
+    filter.Q.setValueAtTime(0.85, t0);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.38, t0 + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(filter).connect(g).connect(ctx.destination);
+    src.start(t0);
+    src.stop(t0 + dur + 0.02);
+  }
+
+  function playClappingSound(){
+    resumeAudioIfNeeded();
+    for (let i=0;i<7;i++) playClapBurst(i * 0.105);
+  }
+
+  function launchConfetti(){
+    if (!celebrationLayer) return;
+    celebrationLayer.innerHTML = "";
+    const colors = ["#ef4444", "#f59e0b", "#22c55e", "#3b82f6", "#8b5cf6", "#ec4899", "#14b8a6"];
+    const count = 130;
+
+    for (let i=0; i<count; i++){
+      const piece = document.createElement("span");
+      piece.className = "confettiPiece";
+      piece.style.background = colors[i % colors.length];
+      const startX = Math.random() * window.innerWidth;
+      const startY = -30 - Math.random() * 120;
+      piece.style.left = startX + "px";
+      piece.style.top = startY + "px";
+      const size = 8 + Math.random() * 10;
+      piece.style.width = size + "px";
+      piece.style.height = (size * (0.75 + Math.random()*1.2)) + "px";
+      celebrationLayer.appendChild(piece);
+
+      const dx = (Math.random()*2 - 1) * 170;
+      const dy = window.innerHeight + 120 + Math.random()*260;
+      const rot = 360 + Math.random()*900;
+      const delay = Math.random() * 260;
+      piece.animate([
+        { transform:`translate(0, -40px) rotate(0deg)`, opacity:0 },
+        { transform:`translate(${dx*0.08}px, ${dy*0.12}px) rotate(${rot*0.15}deg)`, opacity:1, offset:0.12 },
+        { transform:`translate(${dx*0.72}px, ${dy*0.74}px) rotate(${rot*0.75}deg)`, opacity:1, offset:0.80 },
+        { transform:`translate(${dx}px, ${dy}px) rotate(${rot}deg)`, opacity:0 }
+      ], { duration: 2600 + Math.random()*900, delay, easing:"cubic-bezier(.12,.72,.28,1)", fill:"both" });
+    }
+    setTimeout(() => { if (celebrationLayer) celebrationLayer.innerHTML = ""; }, 4100);
+  }
+
+  function celebrateAnswer(){
+    playClappingSound();
+    launchConfetti();
+  }
+
+  /* ✅ activity mode + questions: more/less than the keyed-in number */
+  function refreshActivityModeUI(){
+    if (btnShowNumberMode) btnShowNumberMode.classList.toggle("active", activityMode === "show");
+    if (btnQuestionMode) btnQuestionMode.classList.toggle("active", activityMode === "question");
+    if (questionSettings) questionSettings.classList.toggle("show", activityMode === "question");
+    if (activityModeNote){
+      activityModeNote.innerHTML = activityMode === "show"
+        ? "Show Number Mode displays the keyed-in number with blocks/discs, cards and chart."
+        : "More/Less Than Mode adds a floating question sentence. Press Next to show the block/disc movement first, then the answer appears in the blank.";
+    }
+  }
+
+  function enterShowNumberMode(){
+    activityMode = "show";
+    questionState.active = false;
+    questionState.answered = false;
+    refreshActivityModeUI();
+    updateQuestionBar();
+    render();
+    closeDrawer();
+  }
+
+  function enterQuestionMode(){
+    activityMode = "question";
+    refreshActivityModeUI();
+    updateQuestionPreview();
+  }
+
+  function questionHTML(a, amount, direction, answered){
+    const target = questionTarget(a, amount, direction);
+    const answer = answered ? comma(target) : "";
+    const blankClass = answered ? "answerBlank filled" : "answerBlank";
+    return `${comma(amount)} ${direction === "more" ? "more" : "less"} than ${comma(a)} is <span class="${blankClass}" aria-label="answer blank">${answer}</span>`;
+  }
+  function questionTarget(a, amount, direction){
+    return direction === "more" ? a + amount : a - amount;
+  }
+  function readQuestionConfig(){
+    const a = clampInt(numInput.value, 0, 10000000);
+    const amount = clampInt(questionAmount.value, 1, 10000000);
+    const direction = questionDirection.value === "less" ? "less" : "more";
+    numInput.value = a;
+    questionAmount.value = String(amount);
+    return { a, amount, direction, target: questionTarget(a, amount, direction) };
+  }
+  function updateQuestionPreview(){
+    if (!questionPreview) return;
+    const cfg = readQuestionConfig();
+    questionPreview.innerHTML = questionHTML(cfg.a, cfg.amount, cfg.direction, false);
+  }
+  function updateQuestionBar(){
+    if (!questionBar) return;
+    questionBar.classList.toggle("show", questionState.active && activityMode === "question");
+    if (!questionState.active || activityMode !== "question") return;
+
+    const ans = questionTarget(questionState.a, questionState.amount, questionState.direction);
+    questionText.innerHTML = questionHTML(questionState.a, questionState.amount, questionState.direction, questionState.answered);
+    // Keep the surrounding display stable. After Next, only the blank in the sentence changes.
+    questionHint.textContent = `Pupils write their answer first. Press Next to show the movement and answer.`;
+    btnQuestionNext.textContent = questionState.answered ? "Answered ✓" : "Next ▶";
+    btnRevealQuestion.textContent = questionState.answered ? "Answered ✓" : "Next";
+    btnQuestionNext.disabled = questionState.answered;
+    btnRevealQuestion.disabled = questionState.answered;
+  }
+  function validateQuestionConfig(cfg){
+    if (cfg.direction === "more" && cfg.target > 10000000){
+      showToast("For this question, choose a smaller number. Max answer is 10,000,000.");
+      return false;
+    }
+    if (cfg.direction === "less" && cfg.target < 0){
+      showToast("For 'less than', choose a number that is at least the selected amount.");
+      return false;
+    }
+    return true;
+  }
+  function showQuestion(){
+    activityMode = "question";
+    refreshActivityModeUI();
+    const cfg = readQuestionConfig();
+    if (!validateQuestionConfig(cfg)) return;
+
+    questionState = { active:true, answered:false, a:cfg.a, amount:cfg.amount, direction:cfg.direction };
+    stepInput.value = cfg.amount;
+    numInput.value = cfg.a;
+
+    // Keep the current display exactly as the teacher has set it.
+    // Do not hide cards, expanded form, chart, or change the chosen card view.
+    render();
+    updateQuestionBar();
+    closeDrawer();
+  }
+  async function revealQuestionAnswer(){
+    if (isAnimating) return;
+    if (activityMode !== "question"){
+      enterQuestionMode();
+      return;
+    }
+    if (!questionState.active || questionState.answered){
+      showQuestion();
+      return;
+    }
+
+    const target = questionTarget(questionState.a, questionState.amount, questionState.direction);
+    if (!validateQuestionConfig({ ...questionState, target })) return;
+
+    // Show the movement first, then leave the chart and place value cards on the same answer.
+    closeDrawer();
+
+    const moveDelta = Math.abs(target - questionState.a);
+    const isQuestionAdd = target > questionState.a;
+    const regroupEvents = isQuestionAdd ? computeCarryEvents(questionState.a, moveDelta) : [];
+    if (isQuestionAdd && regroupEvents.length === 0){
+      await animateAddedUnits(moveDelta, effectiveMode(questionState.a));
+    }
+    await animateAndSet(target, moveDelta);
+
+    questionState.answered = true;
+    updateQuestionBar();
+    celebrateAnswer();
+  }
+
+  [questionAmount, questionDirection, numInput].forEach(el => {
+    if (!el) return;
+    el.addEventListener("input", updateQuestionPreview);
+    el.addEventListener("change", updateQuestionPreview);
+  });
+  btnShowNumberMode.addEventListener("click", enterShowNumberMode);
+  btnQuestionMode.addEventListener("click", enterQuestionMode);
+  btnShowQuestion.addEventListener("click", showQuestion);
+  btnRevealQuestion.addEventListener("click", revealQuestionAnswer);
+  btnQuestionAgain.addEventListener("click", showQuestion);
+  btnQuestionNext.addEventListener("click", revealQuestionAnswer);
+
   /* ✅ increment / decrement by chosen step (with regrouping / ungrouping animation) */
   function adjustByStep(dir){
     const step = clampInt(stepInput.value, 1, 10000000);
@@ -2459,7 +2910,10 @@
   stepInput.addEventListener("input", render);
 
   // settings actions
-  apply.addEventListener("click", () => { render(); closeDrawer(); });
+  apply.addEventListener("click", () => {
+    if (activityMode === "question") showQuestion();
+    else { render(); closeDrawer(); }
+  });
   clearBtn.addEventListener("click", () => { numInput.value = 0; preferredMode = "auto"; render(); });
   randSmall.addEventListener("click", () => { numInput.value = Math.floor(Math.random()*10000); preferredMode="auto"; render(); });
   randBig.addEventListener("click", () => { numInput.value = Math.floor(Math.random()*10000001); preferredMode="auto"; render(); });
@@ -2475,6 +2929,7 @@
 
   document.documentElement.style.setProperty("--S", clampInt(size.value,9,16) + "px");
   preferredMode = "auto";
+  updateQuestionPreview();
   render();
   applyChartVisibility();
 
